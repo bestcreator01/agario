@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 /// 
 /// File Contents
 /// 
-///     This class contains the person object.
+///     This class contains the Person object.
 ///     
 /// </summary>
 namespace TowardAgarioStepTwo
