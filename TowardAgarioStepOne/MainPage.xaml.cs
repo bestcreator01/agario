@@ -95,12 +95,10 @@ public partial class MainPage : ContentPage
         // Tell the play surface to redraw itself.
         PlaySurface.Invalidate();
 
-        Debug.WriteLine($"Position of x: {worldDrawable.worldModel.CircleX}, Position of y: {worldDrawable.worldModel.CircleY}");
-        // Update the GUI labels to show the current location of the circle and its direction.
-
         double fps = (DateTime.Now - lastFrameTime).TotalMilliseconds / 1000;
         lastFrameTime = DateTime.Now;
 
+        // Update the GUI labels to show the current location of the circle and its direction.
         Dispatcher.Dispatch(() =>
         {
             FPS.Text = $"FPS: {fps:F2}";
