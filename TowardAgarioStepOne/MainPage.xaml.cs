@@ -22,8 +22,6 @@ using System.Timers;
 
 public partial class MainPage : ContentPage
 {
-    int fps = 0;
-
     /// <summary>
     ///     True if the GUI is initialized.
     /// </summary>
@@ -33,6 +31,8 @@ public partial class MainPage : ContentPage
     ///     The WorldDrawable field.
     /// </summary>
     public WorldDrawable worldDrawable;
+    
+    public DateTime lastFrameTime;
 
     /// <summary>
     ///     The MainPage of ClientGUI.
@@ -75,6 +75,7 @@ public partial class MainPage : ContentPage
         Window.Width = 500;
         Window.Height = 500;
 
+        lastFrameTime = DateTime.Now;
         // The Timer should have a Tick event that calls a method GameStep.
         Timer timer = new(2_000);
         timer.Elapsed += GameStep;
@@ -97,9 +98,15 @@ public partial class MainPage : ContentPage
         Debug.WriteLine($"Position of x: {worldDrawable.worldModel.CircleX}, Position of y: {worldDrawable.worldModel.CircleY}");
         // Update the GUI labels to show the current location of the circle and its direction.
 
-        FPS.Text = $"FPS: ";
-        CircleCenter.Text = $"Center: {worldDrawable.worldModel.CircleX}, {worldDrawable.worldModel.CircleY}";
-        Direction.Text = $"Direction: {worldDrawable.worldModel.CircleDirection}";
+        double fps = (DateTime.Now - lastFrameTime).TotalMilliseconds / 1000;
+        lastFrameTime = DateTime.Now;
+
+        Dispatcher.Dispatch(() =>
+        {
+            FPS.Text = $"FPS: {fps:F2}";
+            CircleCenter.Text = $"Center: {worldDrawable.worldModel.CircleX}, {worldDrawable.worldModel.CircleY}";
+            Direction.Text = $"Direction: {worldDrawable.worldModel.CircleDirection}";
+        });
     }
 }
 
