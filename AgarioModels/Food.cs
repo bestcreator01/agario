@@ -1,6 +1,4 @@
-﻿using Communications;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,32 +17,12 @@ using System.Threading.Tasks;
 /// 
 /// File Contents
 /// 
-///     This class contains details of the Food object.
+///     This class contains the details of a Food object.
 ///     
 /// </summary>
-namespace TowardAgarioStepThree
+namespace AgarioModels
 {
-    public class Food
+    public class Food : GameObject
     {
-        /// <summary>
-        ///  TODO
-        /// </summary>
-        public float X { get; set; }
-
-        /// <summary>
-        ///  TODO
-        /// </summary>
-        public float Y { get; set; }
-
-        /// <summary>
-        ///  TODO
-        /// </summary>
-        public int ARGBcolor { get; set; }
-
-        /// <summary>
-        ///  TODO
-        /// </summary>
-        public float Mass { get; set; }
-
     }
 }

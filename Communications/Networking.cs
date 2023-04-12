@@ -6,7 +6,7 @@ using System.Text;
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
 /// Partner:    Seoin Kim and Gloria Shin
-/// Date:       06-Apr-2023
+/// Date:       14-Apr-2023
 /// Course:     CS 3500, University of Utah, School of Computing
 /// Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not 
 /// be copied for use in Academic Courswork.
@@ -16,7 +16,7 @@ using System.Text;
 /// 
 /// File Contents
 /// 
-///     This contains the networking part of the Networking_and_Logging solution.
+///     This contains the networking part of the Agario solution.
 ///     
 /// </summary>
 

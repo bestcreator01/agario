@@ -1,10 +1,4 @@
-﻿using Communications;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -19,32 +13,39 @@ using System.Threading.Tasks;
 /// 
 /// File Contents
 /// 
-///     This class contains details of the Food object.
+///     This class contains the global state of the Agario world.
 ///     
 /// </summary>
-namespace TowardAgarioStepThree
+namespace AgarioModels
 {
-    public class Food
+    /// <summary>
+    /// 
+    /// </summary>
+    public class World
     {
         /// <summary>
-        ///  TODO
+        ///     The width of the window in pixels.
         /// </summary>
-        public float X { get; set; }
+        public readonly int WindowWidth = 5000;
 
         /// <summary>
-        ///  TODO
+        ///     The height of the window in pixels.
         /// </summary>
-        public float Y { get; set; }
+        public readonly int WindowHeight = 5000;
 
         /// <summary>
-        ///  TODO
+        ///     A list of players.
         /// </summary>
-        public int ARGBcolor { get; set; }
+        public Dictionary<string, Player> PlayerList;
 
         /// <summary>
-        ///  TODO
+        ///     A list of Food objects.
         /// </summary>
-        public float Mass { get; set; }
+        public List<Food> FoodList;
 
+        /// <summary>
+        ///     A logger object.
+        /// </summary>
+        public readonly ILogger logger;
     }
 }
