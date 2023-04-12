@@ -23,11 +23,12 @@ namespace TowardAgarioStepThree
         /// <summary>
         /// 
         /// </summary>
-        public float ARGBcolor { get; set; }
+        public int ARGBcolor { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         public float Mass { get; set; }
+
     }
 }
