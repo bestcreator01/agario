@@ -3,14 +3,105 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ClientGUI.MainPage">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Spacing="25"
-            Padding="30,0"
-            VerticalOptions="Center">
+    <!--
+    Author:     Seoin Kim and Gloria Shin
+    Partner:    Seoin Kim and Gloria Shin
+    Date:       14-Apr-2023
+    Course:     CS 3500, University of Utah, School of Computing
+    Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not 
+    be copied for use in Academic Courswork.
 
+    We, Seoin Kim and Gloria Shin, certify that we wrote this code from scratch and did not copy it in part or whole from another source. 
+    All references used in the completion of the assignments are cited in my README file.
 
-        </VerticalStackLayout>
-    </ScrollView>
+    File Contents
+
+        This contains the xaml codes of Client GUI. 
+    -->
+
+    <Grid>
+        <!-- Welcome screen -->
+        <Grid x:Name="StartScreen" IsVisible="true" BackgroundColor="White">
+            <VerticalStackLayout
+                Spacing="30"
+                HorizontalOptions="CenterAndExpand"
+                VerticalOptions="Center">
+
+                <Label
+                    x:Name="AgarioTitle"
+                    Text="Agar.io"
+                    FontSize="Title"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"/>
+                
+                <HorizontalStackLayout
+                    Spacing="50">
+                    <Label 
+                        x:Name="LabelPlayerName"
+                        Text="Player Name"
+                        TextColor="Black"
+                        FontAttributes="Bold"/>
+                    <Entry
+                        x:Name="EntryPlayerName"
+                        Text=""
+                        TextColor="Black"
+                        BackgroundColor="GhostWhite"
+                        WidthRequest="300"/>
+                    <!--TextChanged="OnPlayerNameChanged"/>-->
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout
+                    Spacing="93">
+                    <Label 
+                        x:Name="LabelServer"
+                        Text="Server"
+                        TextColor="Black"
+                        FontAttributes="Bold"/>
+                    <Entry
+                        x:Name="EntryServer"
+                        Text=""
+                        TextColor="Black"
+                        BackgroundColor="GhostWhite"
+                        WidthRequest="300"/>
+                    <!--TextChanged="OnServerChanged"/>-->
+                </HorizontalStackLayout>
+
+                <Button
+                    x:Name="StartGameButton"
+                    Text="Start Game"
+                    TextColor="Black"
+                    Clicked="StartGameButtonClicked"
+                    BackgroundColor="Pink"/>
+
+                <Label
+                    x:Name="Warning"
+                    Text=""
+                    TextColor="Red"/>
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Game screen -->
+        <Grid x:Name="GameScreen" IsVisible="false">
+            <HorizontalStackLayout>
+                <!-- Add game UI here -->
+                <GraphicsView 
+                    x:Name="PlaySurface"
+                    VerticalOptions="Center"
+                    BackgroundColor="Blue"
+                    HeightRequest="800"
+                    WidthRequest="800">
+                    <GraphicsView.GestureRecognizers>
+                        <PointerGestureRecognizer PointerMoved="PointerChanged"/>
+                        <TapGestureRecognizer Tapped="OnTap"/>
+                        <PanGestureRecognizer PanUpdated="PanUpdated"/>
+                    </GraphicsView.GestureRecognizers>
+                </GraphicsView>
+                
+                <!-- Display information about the game -->
+                <Label 
+                    />
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
 
 </ContentPage>

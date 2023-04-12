@@ -26,12 +26,12 @@ namespace AgarioModels
         /// <summary>
         ///     The width of the window in pixels.
         /// </summary>
-        public readonly int WindowWidth = 5000;
+        public readonly static int WindowWidth = 5000;
 
         /// <summary>
         ///     The height of the window in pixels.
         /// </summary>
-        public readonly int WindowHeight = 5000;
+        public readonly static int WindowHeight = 5000;
 
         /// <summary>
         ///     A list of players.

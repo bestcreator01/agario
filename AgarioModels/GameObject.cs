@@ -81,5 +81,31 @@ namespace AgarioModels
                 return (float)(Math.PI * CircleRadius * CircleRadius);
             }
         }
+
+        /// <summary>
+        ///     In this method add the direction vector to the circle.
+        ///     If the circle moves off the rectangle to the left or right,
+        ///     change the direction vector by multiplying the X direction by a negative one.
+        ///     If the circle moves off the rectangle to the top or bottom, multiply the direction.Y by -1.
+        /// </summary>
+        public void AdvanceGameOneStep()
+        {
+            // Add the direction vector to the circle. ????
+            Location += Location;
+
+            // If the circle moves off the rectangle to the left or right,
+            // change the direction vector by multiplying the X direction by a negative one.
+            if (X - CircleRadius < 0 || X + CircleRadius > World.WindowWidth)
+            {
+                Location = new Vector2(-Location.X, Location.Y);
+            }
+
+            // If the circle moves off the rectangle to the top or bottom,
+            // multiply the direction Y by -1.
+            if (Y - CircleRadius < 0 || Y + CircleRadius > World.WindowHeight)
+            {
+                Location = new Vector2(Location.X, -Location.Y);
+            }
+        }
     }
 }
