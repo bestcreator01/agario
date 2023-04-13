@@ -33,12 +33,12 @@ namespace AgarioModels
         /// <summary>
         ///     Gets or sets the unique identifier for the object.
         /// </summary>
-        public long ID { get; protected set; }
+        public long ID { get; set; }
 
         /// <summary>
         ///     Gets or sets the location of the object in 2D space.
         /// </summary>
-        public Vector2 Location { get; protected set; } = new Vector2(50, 25);
+        public Vector2 Location { get; set; } = new Vector2(50, 25);
 
         /// <summary>
         ///     Gets the X-coordinate of the object's location.
@@ -65,12 +65,12 @@ namespace AgarioModels
         /// <summary>
         ///     Gets or sets the ARGB color value of the object.
         /// </summary>
-        public int ARGBcolor { get; protected set; }
+        public int ARGBcolor { get; set; }
 
         /// <summary>
         ///     Gets or sets the radius of the circle.
         /// </summary>
-        public float CircleRadius { get; protected set; }
+        public float CircleRadius { get; set; }
 
         /// <summary>
         ///     Gets or sets the mass of the object.

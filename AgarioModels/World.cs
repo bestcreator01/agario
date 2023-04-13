@@ -34,14 +34,14 @@ namespace AgarioModels
         public readonly float WindowHeight = 5000;
 
         /// <summary>
-        ///     A list of players.
+        ///     A list of players. Contains ID and player.
         /// </summary>
-        public Dictionary<string, Player> PlayerList = new();
+        public Dictionary<long, Player> PlayerList = new();
 
         /// <summary>
-        ///     A list of Food objects.
+        ///     A list of Food objects. Contains ID and food.
         /// </summary>
-        public List<Food> FoodList = new();
+        public Dictionary<long, Food> FoodList = new();
 
         /// <summary>
         ///     A logger object.
