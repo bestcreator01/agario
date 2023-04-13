@@ -167,7 +167,6 @@ namespace Communications
         /// <param name="port"> the port number of the remote host to connect to </param>
         public void Connect(string host, int port)
         {
-
             try
             {
                 // Check if the TcpClient is already connected. 
@@ -185,6 +184,7 @@ namespace Communications
                 // If an exception occurs during the client process, log the error and disconnect.
                 _logger.LogError($"Error connecting to remote host: {ex.Message}");
                 _handleDisconnect(this);
+                throw;
             }
         }
 
