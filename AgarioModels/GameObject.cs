@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -90,19 +91,22 @@ namespace AgarioModels
         /// </summary>
         public void AdvanceGameOneStep()
         {
+            float windowWidth = 5000;
+            float windowHeight = 5000;
+
             // Add the direction vector to the circle. ????
             Location += Location;
 
             // If the circle moves off the rectangle to the left or right,
             // change the direction vector by multiplying the X direction by a negative one.
-            if (X - CircleRadius < 0 || X + CircleRadius > World.WindowWidth)
+            if (X - CircleRadius < 0 || X + CircleRadius > windowWidth)
             {
                 Location = new Vector2(-Location.X, Location.Y);
             }
 
             // If the circle moves off the rectangle to the top or bottom,
             // multiply the direction Y by -1.
-            if (Y - CircleRadius < 0 || Y + CircleRadius > World.WindowHeight)
+            if (Y - CircleRadius < 0 || Y + CircleRadius > windowHeight)
             {
                 Location = new Vector2(Location.X, -Location.Y);
             }
