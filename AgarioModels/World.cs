@@ -36,12 +36,12 @@ namespace AgarioModels
         /// <summary>
         ///     A list of players.
         /// </summary>
-        public Dictionary<string, Player> PlayerList;
+        public Dictionary<string, Player> PlayerList = new();
 
         /// <summary>
         ///     A list of Food objects.
         /// </summary>
-        public List<Food> FoodList;
+        public List<Food> FoodList = new();
 
         /// <summary>
         ///     A logger object.
