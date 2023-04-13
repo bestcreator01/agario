@@ -46,6 +46,9 @@ namespace ClientGUI
         /// </summary>
         private readonly ILogger logger;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public DateTime lastFrameTime;
 
         /// <summary>
@@ -61,7 +64,6 @@ namespace ClientGUI
         /// <summary>
         ///    This method will be called every time the window is resized
         ///    including the first time the window "shows up" on the screen.
-        ///    TODO - a perfect place to put some initialization code.
         /// </summary>
         /// <param name="width"> the width of the window </param>
         /// <param name="height"> the height of the window </param>
@@ -87,8 +89,8 @@ namespace ClientGUI
             PlaySurface.Drawable = worldDrawable;
 
             // Resize the widget.
-            Window.Width = 500;
-            Window.Height = 500;
+            Window.Width = 800;
+            Window.Height = 800;
 
             lastFrameTime = DateTime.Now;
             // The Timer should have a Tick event that calls a method GameStep.
