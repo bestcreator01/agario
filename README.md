@@ -32,7 +32,7 @@ in Academic Coursework.
 
 	1. Assignment Eight - Agario Client
 		Predicted Hours:	22
-		Actual Hours:		5
+		Actual Hours:		5 + 5
 
 		Note:
 
