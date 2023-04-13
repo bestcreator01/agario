@@ -58,7 +58,7 @@
             </HorizontalStackLayout>
 
             <GraphicsView 
-                x:Name="PlaySurface"
+                x:Name="PlaySurface1"
                 VerticalOptions="Center"
                 BackgroundColor="Blue"
                 HeightRequest="800"

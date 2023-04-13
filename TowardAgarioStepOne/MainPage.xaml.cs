@@ -69,7 +69,7 @@ public partial class MainPage : ContentPage
     private void InitializeGameLogic()
     {
         // Assign your WorldDrawable to the PlaySurface.Drawable property.
-        PlaySurface.Drawable = worldDrawable;
+        PlaySurface1.Drawable = worldDrawable;
 
         // Resize the widget.
         Window.Width = 500;
@@ -93,7 +93,7 @@ public partial class MainPage : ContentPage
         worldDrawable.worldModel.AdvanceGameOneStep();
 
         // Tell the play surface to redraw itself.
-        PlaySurface.Invalidate();
+        PlaySurface1.Invalidate();
 
         double fps = (DateTime.Now - lastFrameTime).TotalMilliseconds / 1000;
         lastFrameTime = DateTime.Now;
