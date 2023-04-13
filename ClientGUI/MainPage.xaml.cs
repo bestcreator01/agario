@@ -2,6 +2,11 @@
 using System.Diagnostics;
 using Communications;
 using Microsoft.Extensions.Logging;
+using AgarioModels;
+using System.Text.Json;
+using System.Collections.Immutable;
+using System.Text.RegularExpressions;
+
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
 /// Partner:    Seoin Kim and Gloria Shin
@@ -50,6 +55,8 @@ namespace ClientGUI
         /// 
         /// </summary>
         public DateTime lastFrameTime;
+
+        private Player player = null;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
@@ -206,11 +213,16 @@ namespace ClientGUI
             // Backend part
             networking.Connect(EntryServer.Text, 11000);
             networking.Send(networking._tcpClient, $"{networking.RemoteAddressPort}: Command Name {networking.ID}");
+            networking.AwaitMessagesAsync();
             worldDrawable = new();
+            player = new();
 
             // Frontend (GUI) part
             Dispatcher.Dispatch(() =>
             {
+                // Update player name in the player class
+                player.Name = EntryPlayerName.Text;
+
                 Warning.IsVisible = false;
                 StartScreen.IsVisible = false;
                 GameScreen.IsVisible = true;
@@ -243,6 +255,115 @@ namespace ClientGUI
         /// <param name="message"> The message that was received. </param>
         void OnMessage(Networking channel, string message)
         {
+            if (message.StartsWith(Protocols.CMD_Food))
+            {
+                Food[] foods = JsonSerializer.Deserialize<Food[]>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
+                
+                // Add the deserialized elements into the FoodList.
+                foreach (var food in foods)
+                {
+                    worldDrawable.world.FoodList.Add(food.ID, food);
+                }
+
+                // TODO - Add in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_Player_Object))
+            {
+                long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
+                
+                // Add the player object into the PlayerList.
+                worldDrawable.world.PlayerList.Add(playerID, player);
+                player.ID = playerID;
+
+                // TODO - Remove in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_Dead_Players))
+            {
+                List<int> deadPlayers = JsonSerializer.Deserialize<List<int>>(message.Substring(Protocols.CMD_Dead_Players.Length));
+
+                // Iterate over the ID of each dead player in deadPlayers.
+                foreach (int deadPlayerID in deadPlayers)
+                {
+                    worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                }
+
+                // TODO - Remove in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_Eaten_Food))
+            {
+                List<long> eatenFoods = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Eaten_Food.Length));
+
+                // Remove all eaten food objects in the food list
+                foreach (var eatenFood in eatenFoods)
+                {
+                    if (worldDrawable.world.FoodList.ContainsKey(eatenFood))
+                    {
+                        worldDrawable.world.FoodList.Remove(eatenFood);
+                    }
+                }
+                // TODO - Remove in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_HeartBeat))
+            {
+                int heartBeat = JsonSerializer.Deserialize<int>(message.Substring(Protocols.CMD_HeartBeat.Length));
+
+                // TODO - Use this in the information label.
+            }
+            else if (message.StartsWith(Protocols.CMD_Update_Players))
+            {
+                List<Player> updatePlayers = JsonSerializer.Deserialize<List<Player>>(message.Substring(Protocols.CMD_Update_Players.Length));
+
+                // Iterate through the updated list of players.
+                foreach (var player in updatePlayers)
+                {
+                    // If playerList contains the appropriate player ID, update player information.
+                    if (worldDrawable.world.PlayerList.ContainsKey(player.ID))
+                    {
+                        var updatedPlayer = worldDrawable.world.PlayerList.TryGetValue(player.ID, out Player newplayer);
+                        newplayer = player;
+                    }
+                }
+
+                // TODO - use this in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_Start_Game))
+            {
+                // TODO - ONLY SEND THIS AFTER THE CONNECTION HAS BEEN ESTABLISHED. (in onConnect)
+                // AND AFTER THE PLAYER IS READY TO START PLAYING.
+                
+            }
+            else if (message.StartsWith(Protocols.CMD_Start_Recognizer))
+            {
+                // Deserialize the regex expression
+                string startRecognizer = JsonSerializer.Deserialize<string>(message.Substring(Protocols.CMD_Start_Recognizer.Length));
+                string input = $"{{name,\"{EntryPlayerName.Text}\"}}";
+                
+                Match match = Regex.Match(input, startRecognizer);
+                if (match.Success)
+                {
+                    channel.Send(channel._tcpClient, input);
+                }
+            }
+            else if (message.StartsWith(Protocols.CMD_Move))
+            {
+
+            }
+            else if (message.StartsWith(Protocols.CMD_Move_Recognizer))
+            {
+
+            }
+            else if (message.StartsWith(Protocols.CMD_Split))
+            {
+                float[] splitCoordinates = JsonSerializer.Deserialize<float[]>(message.Substring(Protocols.CMD_Split.Length));
+                float splitX = splitCoordinates[0];
+                float splitY = splitCoordinates[1];
+
+                // TODO - use these splitX and splitY when pressing spacebar to split toward.
+            }
+            else if (message.StartsWith(Protocols.CMD_Split_Recognizer))
+            {
+
+            }
         }
     }
 }
