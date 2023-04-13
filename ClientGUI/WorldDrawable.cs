@@ -1,4 +1,5 @@
 ﻿using AgarioModels;
+using System.Collections;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -23,12 +24,12 @@ namespace ClientGUI
         /// <summary>
         ///     The screen width - will be computed later.
         /// </summary>
-        private readonly float Width = 500;
+        private readonly float Width = 800;
 
         /// <summary>
         ///     The screen height - will be computed later.
         /// </summary>
-        private readonly float Height = 500;
+        private readonly float Height = 800;
 
         /// <summary>
         ///     World that we have a reference to.
@@ -71,17 +72,61 @@ namespace ClientGUI
         /// <param name="dirtyRect"> The area of the canvas that needs to be redrawn. </param>
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
+            DrawPlaySurface(canvas);
 
-            foreach (var food in world.FoodList)
+            DrawGameObject(canvas, world.FoodList);
+
+            DrawGameObject(canvas, world.PlayerList.Values);
+        }
+
+        /// <summary>
+        ///     A helper method to draw a play surface.
+        /// </summary>
+        /// <param name="canvas"> The canvas object to draw on. </param>
+        private void DrawPlaySurface(ICanvas canvas)
+        {
+            ConvertFromWorldToScreen(world.WindowWidth, world.WindowHeight, out int Width, out int Height);
+            canvas.FillColor = Colors.LightPink;
+            canvas.StrokeColor = Colors.Black;
+            canvas.StrokeSize = 2;
+            canvas.FillRectangle(0, 0, Width, Height);
+        }
+
+        /// <summary>
+        ///     A helper method to draw game objects.
+        /// </summary>
+        /// <param name="canvas"> The canvas object to draw on. </param>
+        private void DrawGameObject(ICanvas canvas, IEnumerable gameObject)
+        {
+            Random rand = new Random();
+
+            foreach (var obj in gameObject)
             {
-                //ConvertFromWorldToScreen(food.X, food.Y);
-                float x = food.X;
-                float y = food.Y;
-                float radius = food.CircleRadius;
+                // Assign the parameters you need for drawing objects.
+                float x = 0; float y = 0; float radius = 0;
 
-                canvas.StrokeColor = Colors.Black;
-                canvas.StrokeSize = 2;
-                canvas.FillColor = Colors.LightSkyBlue;
+                // Declare the values of x, y, and radius depending on what object it is.
+                if (obj is Food food)
+                {
+                    x = food.X;
+                    y = food.Y;
+                    radius = food.CircleRadius;
+                }
+                else if (obj is Player player)
+                {
+                    x = player.X;
+                    y = player.Y;
+                    radius = player.CircleRadius; // TODO - Set the circle radius of players bigger than foods.
+                }
+
+                // generate a random value between 0 and 255 for each color component
+                byte r = (byte)rand.Next(256);
+                byte g = (byte)rand.Next(256);
+                byte b = (byte)rand.Next(256);
+                Color randomColor = Color.FromRgb(r, g, b);
+
+                // Draw on canvas.
+                canvas.FillColor = randomColor;
                 canvas.FillCircle(x, y, radius);
             }
         }
@@ -99,23 +144,17 @@ namespace ClientGUI
         /// the area of the "world" that is shown. Think about how to do this and ask questions
         /// in lecture.
         /// </summary>
-        /// <param name="world_x"></param>
-        /// <param name="world_y"></param>
         /// <param name="world_w"></param>
         /// <param name="world_h"></param>
-        /// <param name="screen_x"></param>
-        /// <param name="screen_y"></param>
         /// <param name="screen_w"></param>
         /// <param name="screen_h"></param>
         private void ConvertFromWorldToScreen(
-        in float world_x, in float world_y, in float world_w, in float world_h,
-        out int screen_x, out int screen_y, out int screen_w, out int screen_h)
+        in float world_w, in float world_h,
+        out int screen_w, out int screen_h)
         {
-            // TODO - calculate the screen coordinates based on the lecture slides
-            screen_x = (int)(world_x / 3000.0F * this.Width);
-            screen_y = (int)(world_y / 2000.0F * this.Height);
-            screen_w = (int)(world_w / 3000.0F * this.Width);
-            screen_h = (int)(world_h / 2000.0F * this.Height);
+            // Calculate the screen coordinates based on the lecture slides.
+            screen_w = (int)(world_w / 5000.0F * Width);
+            screen_h = (int)(world_h / 5000.0F * Height);
         }
     }
 }
