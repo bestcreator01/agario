@@ -19,89 +19,122 @@
         This contains the xaml codes of Client GUI. 
     -->
 
-    <Grid>
-        <!-- Welcome screen -->
-        <Grid x:Name="StartScreen" IsVisible="true" BackgroundColor="White">
-            <VerticalStackLayout
-                Spacing="30"
-                HorizontalOptions="CenterAndExpand"
-                VerticalOptions="Center">
+    <VerticalStackLayout>
+        <ScrollView
+            x:Name="StartScreen"
+            IsVisible="true"
+            BackgroundColor="White">
+            <!-- Welcome screen -->
+            <VerticalStackLayout>
+                <VerticalStackLayout 
+                    Spacing="30" 
+                    HorizontalOptions="CenterAndExpand" 
+                    VerticalOptions="Center">
 
-                <Label
+                    <Label
                     x:Name="AgarioTitle"
                     Text="Agar.io"
                     FontSize="Title"
                     FontAttributes="Bold"
                     HorizontalOptions="Center"/>
-                
-                <HorizontalStackLayout
-                    Spacing="50">
-                    <Label 
-                        x:Name="LabelPlayerName"
-                        Text="Player Name"
-                        TextColor="Black"
-                        FontAttributes="Bold"/>
-                    <Entry
-                        x:Name="EntryPlayerName"
-                        Text=""
-                        TextColor="Black"
-                        BackgroundColor="GhostWhite"
-                        WidthRequest="300"/>
-                    <!--TextChanged="OnPlayerNameChanged"/>-->
-                </HorizontalStackLayout>
 
-                <HorizontalStackLayout
+                    <HorizontalStackLayout Spacing="50">
+                        <Label 
+                            x:Name="LabelPlayerName"
+                            Text="Player Name"
+                            TextColor="Black"
+                            FontAttributes="Bold"/>
+                        <Entry
+                            x:Name="EntryPlayerName"
+                            Text=""
+                            TextColor="Black"
+                            BackgroundColor="GhostWhite"
+                            WidthRequest="300"/>
+                        <!--TextChanged="OnPlayerNameChanged"/>-->
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout
                     Spacing="93">
-                    <Label 
+                        <Label 
                         x:Name="LabelServer"
                         Text="Server"
                         TextColor="Black"
                         FontAttributes="Bold"/>
-                    <Entry
+                        <Entry
                         x:Name="EntryServer"
-                        Text=""
+                        Text="localhost"
                         TextColor="Black"
                         BackgroundColor="GhostWhite"
                         WidthRequest="300"/>
-                    <!--TextChanged="OnServerChanged"/>-->
-                </HorizontalStackLayout>
+                        <!--TextChanged="OnServerChanged"/>-->
+                    </HorizontalStackLayout>
 
-                <Button
+                    <Button
                     x:Name="StartGameButton"
                     Text="Start Game"
                     TextColor="Black"
                     Clicked="StartGameButtonClicked"
                     BackgroundColor="Pink"/>
 
-                <Label
+                    <Label
                     x:Name="Warning"
+                    IsVisible="false"
                     Text=""
-                    TextColor="Red"/>
+                    TextColor="Red"
+                    HorizontalOptions="Center"/>
+                </VerticalStackLayout>
             </VerticalStackLayout>
-        </Grid>
+        </ScrollView>
 
         <!-- Game screen -->
-        <Grid x:Name="GameScreen" IsVisible="false">
+        <ScrollView
+            x:Name="GameScreen"
+            IsVisible="false"
+            HorizontalOptions="Start"
+            VerticalOptions="Start">
             <HorizontalStackLayout>
                 <!-- Add game UI here -->
                 <GraphicsView 
                     x:Name="PlaySurface"
-                    VerticalOptions="Center"
+                    IsVisible="true"
                     BackgroundColor="Blue"
                     HeightRequest="800"
                     WidthRequest="800">
-                    <GraphicsView.GestureRecognizers>
+                    <!--<GraphicsView.GestureRecognizers>
                         <PointerGestureRecognizer PointerMoved="PointerChanged"/>
                         <TapGestureRecognizer Tapped="OnTap"/>
                         <PanGestureRecognizer PanUpdated="PanUpdated"/>
-                    </GraphicsView.GestureRecognizers>
+                    </GraphicsView.GestureRecognizers>-->
                 </GraphicsView>
-                
-                <!-- Display information about the game -->
-                <Label 
-                    />
-            </HorizontalStackLayout>
-        </Grid>
-    </Grid>
 
+                <!-- Display information about the game -->
+                <VerticalStackLayout>
+                    <Label
+                        x:Name="Title"
+                        Text="Agario - Step One!"
+                        TextColor="Black"
+                        FontAttributes="Bold"
+                        FontSize="Title"/>
+
+                    <Label
+                        x:Name="FPS"
+                        Text="FPS: "
+                        TextColor="Black"
+                        FontSize="Subtitle"/>
+
+                    <Label
+                            x:Name="CircleCenter"
+                            Text="Center: "
+                            TextColor="Black"
+                            FontSize="Subtitle"/>
+
+                    <Label
+                            x:Name="Direction"
+                            Text ="Direction: "
+                            TextColor="Black"
+                            FontSize="Subtitle"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </ScrollView>
+    </VerticalStackLayout>
 </ContentPage>

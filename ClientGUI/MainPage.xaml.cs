@@ -1,8 +1,7 @@
-﻿
-using static Android.Telephony.CarrierConfigManager;
-
-using System.Timers;
+﻿using System.Timers;
 using System.Diagnostics;
+using Communications;
+using Microsoft.Extensions.Logging;
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
 /// Partner:    Seoin Kim and Gloria Shin
@@ -23,7 +22,7 @@ using System.Diagnostics;
 namespace ClientGUI
 {
     /// <summary>
-    /// TODO
+    ///     The MainPage for ClientGUI.
     /// </summary>
     public partial class MainPage : ContentPage
     {
@@ -37,15 +36,26 @@ namespace ClientGUI
         /// </summary>
         public WorldDrawable worldDrawable;
 
+        /// <summary>
+        ///     The Networking field for a client to connect to a server.
+        /// </summary>
+        public Networking networking = null;
+
+        /// <summary>
+        ///     A logger object that we would use for debug purpose.
+        /// </summary>
+        private readonly ILogger logger;
+
         public DateTime lastFrameTime;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
         /// </summary>
-        public MainPage()
+        public MainPage(ILogger<MainPage> _logger)
         {
             InitializeComponent();
-            // worldDrawable = new();
+            worldDrawable = new();
+            logger = _logger;
         }
 
         /// <summary>
@@ -107,8 +117,8 @@ namespace ClientGUI
             Dispatcher.Dispatch(() =>
             {
                 FPS.Text = $"FPS: {fps:F2}";
-                CircleCenter.Text = $"Center: {worldDrawable.gameObject.X}, {worldDrawable.gameObject.Y}";
-                Direction.Text = $"Direction: {worldDrawable.gameObject.Location}";
+                CircleCenter.Text = $"Center: {worldDrawable.gameObject.X:F2}, {worldDrawable.gameObject.Y:F2}";
+                Direction.Text = $"Direction: {worldDrawable.gameObject.Location:F2}";
             });
         }
 
@@ -118,12 +128,9 @@ namespace ClientGUI
 
         // TODO - draw the game state.
 
-        
-        
-        
-        
+
         // Manage the GUI controls.
-        
+
         /// <summary>
         /// TODO 
         /// </summary>
@@ -131,14 +138,109 @@ namespace ClientGUI
         /// <param name="e"> ignored </param>
         void StartGameButtonClicked(object sender, EventArgs e)
         {
-            // TODO - If the connection is successful, go to the next grid.
-            // or, show the warning label that the connection was not
-            // successful.
+            if (EntryPlayerName.Text == "")
+            {
+                Dispatcher.Dispatch(() =>
+                {
+                    Warning.IsVisible = true;
+                    Warning.Text = "Please Type Your Name!";
+                });
+            }
+            else
+            {
+                // Try connecting for the first time.
+                if (networking == null)
+                {
+                    try
+                    {
+                        // Creates a new networking object to connect.
+                        networking = new Networking(logger, OnConnect, OnDisconnect, OnMessage, '\n');
+
+                        // Put the user name in the networking object.
+                        networking.ID = EntryPlayerName.Text;
+
+                        // Try connecting to server.
+                        ConnectToServer();
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowWarningMessage(ex);
+                    }
+                }
+                else
+                {
+                    // Reconnecting..
+                    try
+                    {
+                        ConnectToServer();
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowWarningMessage(ex);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Shows a warning message when the client fails to connect to the server.
+        /// </summary>
+        /// <param name="ex"> the error message </param>
+        private void ShowWarningMessage(Exception ex)
+        {
+            // Frontend (GUI) part
             Dispatcher.Dispatch(() =>
             {
+                Warning.IsVisible = true;
+                Warning.Text = $"Failed to connect to the server: {ex.Message}";
+            });
+        }
+
+        /// <summary>
+        ///     A helper method that tries connecting to the server.
+        /// </summary>
+        private void ConnectToServer()
+        {
+            // Backend part
+            networking.Connect(EntryServer.Text, 11000);
+            networking.Send(networking._tcpClient, $"{networking.RemoteAddressPort}: Command Name {networking.ID}");
+            worldDrawable = new();
+
+            // Frontend (GUI) part
+            Dispatcher.Dispatch(() =>
+            {
+                Warning.IsVisible = false;
                 StartScreen.IsVisible = false;
                 GameScreen.IsVisible = true;
             });
+        }
+
+        /// <summary>
+        ///     Callback for when the connection to a network is successful.
+        /// </summary>
+        /// <param name="channel"> The networking channel where the connection occured. </param>
+        void OnConnect(Networking channel)
+        {
+            // Send a message to the server that this client is connected.
+            channel.Send(channel._tcpClient, $"Client connected: {channel.ID}");
+        }
+
+        /// <summary>
+        ///     Callback for when the connection to a network is lost.
+        /// </summary>
+        /// <param name="channel"> The networking channel where the disconnection occured. </param>
+        void OnDisconnect(Networking channel)
+        {
+            // Send a message to the server that this client is disconnected.
+        }
+
+        /// <summary>
+        ///     Callback for when a message arrives on the network.
+        /// </summary>
+        /// <param name="channel"> The networking channel where the message came from. </param>
+        /// <param name="message"> The message that was received. </param>
+        void OnMessage(Networking channel, string message)
+        {
         }
     }
 }

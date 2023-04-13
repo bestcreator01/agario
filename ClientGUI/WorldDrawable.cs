@@ -1,5 +1,21 @@
 ﻿using AgarioModels;
 
+/// <summary>
+/// Author:     Seoin Kim and Gloria Shin
+/// Partner:    Seoin Kim and Gloria Shin
+/// Date:       14-Apr-2023
+/// Course:     CS 3500, University of Utah, School of Computing
+/// Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not 
+/// be copied for use in Academic Courswork.
+/// 
+/// We, Seoin Kim and Gloria Shin, certify that we wrote this code from scratch and did not copy it in part or whole from another source. 
+/// All references used in the completion of the assignments are cited in my README file.
+/// 
+/// File Contents
+/// 
+///     This class contains the code for drawing the world and game objects.
+///     
+/// </summary>
 namespace ClientGUI
 {
     public class WorldDrawable : IDrawable
@@ -40,12 +56,22 @@ namespace ClientGUI
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public WorldDrawable()
+        {
+            world = new World();
+            gameObject = new GameObject();
+        }
+
+        /// <summary>
         ///     Draws a circle based on the WorldModel object data.
         /// </summary>
         /// <param name="canvas"> The canvas object to draw on. </param>
         /// <param name="dirtyRect"> The area of the canvas that needs to be redrawn. </param>
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
+
             foreach (var food in world.FoodList)
             {
                 //ConvertFromWorldToScreen(food.X, food.Y);
@@ -87,7 +113,7 @@ namespace ClientGUI
         {
             // TODO - calculate the screen coordinates based on the lecture slides
             screen_x = (int)(world_x / 3000.0F * this.Width);
-            screen_y = (int)(world_y / 200-0.0F * this.Height);
+            screen_y = (int)(world_y / 2000.0F * this.Height);
             screen_w = (int)(world_w / 3000.0F * this.Width);
             screen_h = (int)(world_h / 2000.0F * this.Height);
         }
