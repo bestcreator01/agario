@@ -38,7 +38,7 @@ namespace AgarioModels
         /// <summary>
         ///     Gets or sets the location of the object in 2D space.
         /// </summary>
-        public Vector2 Location { get; set; } = new Vector2(50, 25);
+        public Vector2 Location { get; set; }
 
         /// <summary>
         ///     Gets the X-coordinate of the object's location.
