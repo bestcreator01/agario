@@ -36,9 +36,9 @@ namespace ClientGUI
         /// </summary>
         public bool initialized = false;
 
-        /// <summary>
-        ///     The WorldDrawable field.
-        /// </summary>
+        ///// <summary>
+        /////     the worlddrawable field.
+        ///// </summary>
         public WorldDrawable worldDrawable;
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace ClientGUI
         /// </summary>
         public DateTime lastFrameTime;
 
-        private Player player = null;
+        private Player ClientPlayer = null;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
@@ -64,27 +64,27 @@ namespace ClientGUI
         public MainPage(ILogger<MainPage> _logger)
         {
             InitializeComponent();
-            worldDrawable = new();
+            //worldDrawable = new(PlaySurface);
             logger = _logger;
         }
 
-        /// <summary>
-        ///    This method will be called every time the window is resized
-        ///    including the first time the window "shows up" on the screen.
-        /// </summary>
-        /// <param name="width"> the width of the window </param>
-        /// <param name="height"> the height of the window </param>
-        protected override void OnSizeAllocated(double width, double height)
-        {
-            base.OnSizeAllocated(width, height);
-            Debug.WriteLine($"OnSizeAllocated {width} {height}");
+        ///// <summary>
+        /////    This method will be called every time the window is resized
+        /////    including the first time the window "shows up" on the screen.
+        ///// </summary>
+        ///// <param name="width"> the width of the window </param>
+        ///// <param name="height"> the height of the window </param>
+        //protected override void OnSizeAllocated(double width, double height)
+        //{
+        //    base.OnSizeAllocated(width, height);
+        //    Debug.WriteLine($"OnSizeAllocated {width} {height}");
 
-            if (!initialized)
-            {
-                initialized = true;
-                InitializeGameLogic();
-            }
-        }
+        //    if (!initialized)
+        //    {
+        //        initialized = true;
+        //        InitializeGameLogic();
+        //    }
+        //}
 
         /// <summary>
         ///     Initializes the game logic.
@@ -95,11 +95,12 @@ namespace ClientGUI
             // Assign your WorldDrawable to the PlaySurface.Drawable property.
             PlaySurface.Drawable = worldDrawable;
 
-            // Resize the widget.
-            Window.Width = 800;
-            Window.Height = 800;
+            //// Resize the widget.
+            //PlaySurface.Width = 800;
+            //Window.Height = 800;
 
             lastFrameTime = DateTime.Now;
+
             // The Timer should have a Tick event that calls a method GameStep.
             System.Timers.Timer timer = new(2_000);
             timer.Elapsed += GameStep;
@@ -107,13 +108,14 @@ namespace ClientGUI
         }
 
         /// <summary>
-        /// This method is called repeatedly by a timer to update the game state and refresh the display.
+        ///     This method is called repeatedly by a timer to update the game state 
+        ///     and refresh the display.
         /// </summary>
         /// <param name="state"> An object containing state information for the timer (not used in this method). </param>
         /// <param name="args"> An object containing event data for the elapsed event (not used in this method). </param>
         void GameStep(object state, ElapsedEventArgs args)
         {
-            // Tell the world model to AdvanceGameOneStep.
+            // Tell the world model to AdvanceGameOneStep.`
             worldDrawable.gameObject.AdvanceGameOneStep();
 
             // Tell the play surface to redraw itself.
@@ -141,7 +143,67 @@ namespace ClientGUI
         // Manage the GUI controls.
 
         /// <summary>
-        /// TODO 
+        ///     Handles when the pointer is changed.
+        /// </summary>
+        /// <param name="sender"> ignored </param>
+        /// <param name="e"> The pointer event that is occurring </param>
+        void PointerChanged(object sender, PointerEventArgs e)
+        {
+            // Only positive and negative integers are acceptable
+            int floatToIntX = (int)ClientPlayer.X;
+            int floatToIntY = (int)ClientPlayer.Y;
+
+            string message = String.Format(Protocols.CMD_Move, floatToIntX, floatToIntY);
+
+            Match match = Regex.Match(message, Protocols.CMD_Move_Recognizer);
+            if (match.Success)
+            {
+                networking.Send(networking._tcpClient, message);
+            }
+
+            // if pointer is changed,
+            // update the location of the ClientPlayer in the playsurface
+            // some code like this - e.GetPosition( playsurface )
+            // pointer at .X and .Y
+            // ...
+        }
+
+
+
+        /// <summary>
+        ///     Handles when the spacebar is tapped.
+        /// </summary>
+        /// <param name="sender"> ignored </param>
+        /// <param name="e"> The tap event that is occuring </param>
+        void OnTap(object sender, TappedEventArgs e)
+        {
+            int floatToIntX = (int)ClientPlayer.X;
+            int floatToIntY = (int)ClientPlayer.Y;
+
+            string message = String.Format(Protocols.CMD_Split, floatToIntX, floatToIntY);
+
+            Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
+            if (match.Success)
+            {
+                networking.Send(networking._tcpClient, message);
+            }
+
+            // TODO - Put CMD_Split and CMD_Split_Recognizer here.
+        }
+
+        /// <summary>
+        ///     Handles when the mouse is dragged on the PlaySurface.
+        ///     It helps you when zooming in and out.
+        /// </summary>
+        /// <param name="sender"> ignored </param>
+        /// <param name="e"> The pan event that is occuring </param>
+        void PanUpdated(object sender, PanUpdatedEventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        ///     Handles when the start game button is clicked. 
         /// </summary>
         /// <param name="sender"> ignored </param>
         /// <param name="e"> ignored </param>
@@ -213,15 +275,18 @@ namespace ClientGUI
             // Backend part
             networking.Connect(EntryServer.Text, 11000);
             networking.Send(networking._tcpClient, $"{networking.RemoteAddressPort}: Command Name {networking.ID}");
-            networking.AwaitMessagesAsync();
-            worldDrawable = new();
-            player = new();
+
+            // Start receiving messages from server.
+            new Thread(() => networking.AwaitMessagesAsync(infinite: true)).Start();
+            worldDrawable = new(PlaySurface);
+            InitializeGameLogic();
+            ClientPlayer = new();
 
             // Frontend (GUI) part
             Dispatcher.Dispatch(() =>
             {
-                // Update player name in the player class
-                player.Name = EntryPlayerName.Text;
+                // Update ClientPlayer name in the ClientPlayer class
+                ClientPlayer.Name = EntryPlayerName.Text;
 
                 Warning.IsVisible = false;
                 StartScreen.IsVisible = false;
@@ -235,8 +300,19 @@ namespace ClientGUI
         /// <param name="channel"> The networking channel where the connection occured. </param>
         void OnConnect(Networking channel)
         {
-            // Send a message to the server that this client is connected.
-            channel.Send(channel._tcpClient, $"Client connected: {channel.ID}");
+            // Combine the ClientPlayer name with the CMD message.
+            string playerName = EntryPlayerName.Text;
+            string startGameMessage = string.Format(Protocols.CMD_Start_Game, playerName);
+
+            // Check if it matches with Recognizer.
+            Match match = Regex.Match(playerName, Protocols.CMD_Start_Recognizer);
+            bool matchesWithRecognizer = match.Success;
+
+            // If the name matches with the recognizer, then send the name of a ClientPlayer to a server.
+            if (matchesWithRecognizer)
+            {
+                channel.Send(channel._tcpClient, startGameMessage);
+            }
         }
 
         /// <summary>
@@ -270,10 +346,10 @@ namespace ClientGUI
             else if (message.StartsWith(Protocols.CMD_Player_Object))
             {
                 long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
-                
-                // Add the player object into the PlayerList.
-                worldDrawable.world.PlayerList.Add(playerID, player);
-                player.ID = playerID;
+
+                // Add the ClientPlayer object into the PlayerList.
+                worldDrawable.world.PlayerList.Add(playerID, ClientPlayer);
+                ClientPlayer.ID = playerID;
 
                 // TODO - Remove in GUI as well.
             }
@@ -281,7 +357,7 @@ namespace ClientGUI
             {
                 List<int> deadPlayers = JsonSerializer.Deserialize<List<int>>(message.Substring(Protocols.CMD_Dead_Players.Length));
 
-                // Iterate over the ID of each dead player in deadPlayers.
+                // Iterate over the ID of each dead ClientPlayer in deadPlayers.
                 foreach (int deadPlayerID in deadPlayers)
                 {
                     worldDrawable.world.PlayerList.Remove(deadPlayerID);
@@ -316,53 +392,15 @@ namespace ClientGUI
                 // Iterate through the updated list of players.
                 foreach (var player in updatePlayers)
                 {
-                    // If playerList contains the appropriate player ID, update player information.
+                    // If playerList contains the appropriate ClientPlayer ID, update ClientPlayer information.
                     if (worldDrawable.world.PlayerList.ContainsKey(player.ID))
                     {
-                        var updatedPlayer = worldDrawable.world.PlayerList.TryGetValue(player.ID, out Player newplayer);
-                        newplayer = player;
+                        var updatedPlayer = worldDrawable.world.PlayerList.TryGetValue(player.ID, out Player newPlayer);
+                        newPlayer = player;
                     }
                 }
 
                 // TODO - use this in GUI as well.
-            }
-            else if (message.StartsWith(Protocols.CMD_Start_Game))
-            {
-                // TODO - ONLY SEND THIS AFTER THE CONNECTION HAS BEEN ESTABLISHED. (in onConnect)
-                // AND AFTER THE PLAYER IS READY TO START PLAYING.
-                
-            }
-            else if (message.StartsWith(Protocols.CMD_Start_Recognizer))
-            {
-                // Deserialize the regex expression
-                string startRecognizer = JsonSerializer.Deserialize<string>(message.Substring(Protocols.CMD_Start_Recognizer.Length));
-                string input = $"{{name,\"{EntryPlayerName.Text}\"}}";
-                
-                Match match = Regex.Match(input, startRecognizer);
-                if (match.Success)
-                {
-                    channel.Send(channel._tcpClient, input);
-                }
-            }
-            else if (message.StartsWith(Protocols.CMD_Move))
-            {
-
-            }
-            else if (message.StartsWith(Protocols.CMD_Move_Recognizer))
-            {
-
-            }
-            else if (message.StartsWith(Protocols.CMD_Split))
-            {
-                float[] splitCoordinates = JsonSerializer.Deserialize<float[]>(message.Substring(Protocols.CMD_Split.Length));
-                float splitX = splitCoordinates[0];
-                float splitY = splitCoordinates[1];
-
-                // TODO - use these splitX and splitY when pressing spacebar to split toward.
-            }
-            else if (message.StartsWith(Protocols.CMD_Split_Recognizer))
-            {
-
             }
         }
     }

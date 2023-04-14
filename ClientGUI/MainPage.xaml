@@ -54,7 +54,7 @@
                             FontAttributes="Bold"/>
                         <Entry
                             x:Name="EntryPlayerName"
-                            Text=""
+                            Text="test"
                             TextColor="Black"
                             BackgroundColor="GhostWhite"
                             WidthRequest="300"/>
@@ -100,7 +100,7 @@
             IsVisible="false">
             <VerticalStackLayout
                 Spacing="30">
-                
+
                 <Label
                     x:Name="GameScreenTitle"
                     Text="Agar.io World"
@@ -110,7 +110,7 @@
                     HorizontalOptions="Center"
                     VerticalOptions="Center">
                 </Label>
-                
+
                 <HorizontalStackLayout
                     Spacing="60">
 
@@ -122,11 +122,12 @@
                         WidthRequest="800"
                         HorizontalOptions="Start"
                         VerticalOptions="Center">
-                        <!--<GraphicsView.GestureRecognizers>
-                        <PointerGestureRecognizer PointerMoved="PointerChanged"/>
-                        <TapGestureRecognizer Tapped="OnTap"/>
-                        <PanGestureRecognizer PanUpdated="PanUpdated"/>
-                    </GraphicsView.GestureRecognizers>-->
+                        <GraphicsView.GestureRecognizers>
+                            <PointerGestureRecognizer PointerMoved="PointerChanged"/> <!--mouse-->
+                            <TapGestureRecognizer Tapped="OnTap"/> <!--spacebar-->
+                            <PanGestureRecognizer PanUpdated="PanUpdated"/>
+                            <!--zooming in-->
+                        </GraphicsView.GestureRecognizers>
                     </GraphicsView>
 
                     <!-- Display information about the game -->

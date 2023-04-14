@@ -34,8 +34,6 @@ namespace ClientGUI
         /// <summary>
         ///     World that we have a reference to.
         /// </summary>
-        private readonly CheckBox moveOnInvalidateCheckBox;
-        private readonly CheckBox invalidateAlwaysCheckBox;
         private readonly GraphicsView gv;
 
         /// <summary>
@@ -45,24 +43,21 @@ namespace ClientGUI
         public GameObject gameObject;
 
         /// <summary>
-        ///     Constructor of WorldDrawable
+        ///     
         /// </summary>
-        public WorldDrawable(CheckBox moveOnIvalidateCheckBox, CheckBox invalidateAlwaysCheckBox, GraphicsView gv)
-        {
-            world = new World();
-            gameObject = new GameObject();
-            this.moveOnInvalidateCheckBox = moveOnIvalidateCheckBox;
-            this.invalidateAlwaysCheckBox = invalidateAlwaysCheckBox;
-            this.gv = gv;
-        }
+        private readonly IEnumerable<Food> foodList;
+        private readonly IEnumerable<Player> playerList;
 
         /// <summary>
-        /// 
+        ///     Constructor of WorldDrawable
         /// </summary>
-        public WorldDrawable()
+        public WorldDrawable(GraphicsView gv)
         {
             world = new World();
             gameObject = new GameObject();
+            this.gv = gv;
+            foodList = world.FoodList.Values;
+            playerList = world.PlayerList.Values;
         }
 
         /// <summary>
@@ -74,9 +69,9 @@ namespace ClientGUI
         {
             DrawPlaySurface(canvas);
 
-            DrawGameObject(canvas, world.FoodList);
+            DrawGameObject(canvas, foodList);
 
-            DrawGameObject(canvas, world.PlayerList.Values);
+            DrawGameObject(canvas, playerList);
         }
 
         /// <summary>
@@ -98,12 +93,10 @@ namespace ClientGUI
         /// <param name="canvas"> The canvas object to draw on. </param>
         private void DrawGameObject(ICanvas canvas, IEnumerable gameObject)
         {
-            Random rand = new Random();
-
             foreach (var obj in gameObject)
             {
                 // Assign the parameters you need for drawing objects.
-                float x = 0; float y = 0; float radius = 0;
+                float x = 0; float y = 0; float radius = 0; int color = 0;
 
                 // Declare the values of x, y, and radius depending on what object it is.
                 if (obj is Food food)
@@ -111,22 +104,18 @@ namespace ClientGUI
                     x = food.X;
                     y = food.Y;
                     radius = food.CircleRadius;
+                    color = food.ARGBcolor;
                 }
                 else if (obj is Player player)
                 {
                     x = player.X;
                     y = player.Y;
                     radius = player.CircleRadius; // TODO - Set the circle radius of players bigger than foods.
+                    color = player.ARGBcolor;
                 }
 
-                // generate a random value between 0 and 255 for each color component
-                byte r = (byte)rand.Next(256);
-                byte g = (byte)rand.Next(256);
-                byte b = (byte)rand.Next(256);
-                Color randomColor = Color.FromRgb(r, g, b);
-
                 // Draw on canvas.
-                canvas.FillColor = randomColor;
+                canvas.FillColor = Color.FromInt(color);
                 canvas.FillCircle(x, y, radius);
             }
         }
