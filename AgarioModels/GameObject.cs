@@ -36,7 +36,7 @@ namespace AgarioModels
         public float X { get { return Location.X; } }
         public float Y { get { return Location.Y; } }
         public int ARGBColor { get; private set; }
-        public float CircleRadius { get; private set; }
+        public float CircleRadius { get; private set; } = 3;
         public float Mass 
         { 
             get 
