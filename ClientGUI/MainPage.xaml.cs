@@ -23,7 +23,6 @@ using System.Text.RegularExpressions;
 ///     This contains the codes to display the game on the client side.
 ///     
 /// </summary>
-
 namespace ClientGUI
 {
     /// <summary>
@@ -41,11 +40,6 @@ namespace ClientGUI
         ///// </summary>
         public WorldDrawable worldDrawable;
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public World world;
-
         /// <summary>
         ///     The Networking field for a client to connect to a server.
         /// </summary>
@@ -57,11 +51,15 @@ namespace ClientGUI
         private readonly ILogger logger;
 
         /// <summary>
-        /// 
+        ///     The timestamp of the last frame rendered in the game.
         /// </summary>
         public DateTime lastFrameTime;
 
-        private Player ClientPlayer = new();
+        /// <summary>
+        ///     The player object representing the client player. 
+        ///     This is null if the player has not yet joined the game.
+        /// </summary>
+        private Player ClientPlayer = null;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
@@ -71,32 +69,24 @@ namespace ClientGUI
             InitializeComponent();
             worldDrawable = new(PlaySurface);
             logger = _logger;
+            logger.LogInformation("This is a ChatClient MainPage.xaml.cs constructor.");
+            try
+            {
+                _logger.LogInformation("This line is in ParseMessageHandler.");
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"Logger error: {ex.Message}");
+            }
         }
-
-        ///// <summary>
-        /////    This method will be called every time the window is resized
-        /////    including the first time the window "shows up" on the screen.
-        ///// </summary>
-        ///// <param name="width"> the width of the window </param>
-        ///// <param name="height"> the height of the window </param>
-        //protected override void OnSizeAllocated(double width, double height)
-        //{
-        //    base.OnSizeAllocated(width, height);
-        //    Debug.WriteLine($"OnSizeAllocated {width} {height}");
-
-        //    if (!initialized)
-        //    {
-        //        initialized = true;
-        //        InitializeGameLogic();
-        //    }
-        //}
 
         /// <summary>
         ///     Initializes the game logic.
         /// </summary>
-        /// <exception cref="NotImplementedException"></exception>
         private void InitializeGameLogic()
         {
+            initialized = true;
+            
             // Assign your WorldDrawable to the PlaySurface.Drawable property.
             PlaySurface.Drawable = worldDrawable;
 
@@ -138,14 +128,7 @@ namespace ClientGUI
             });
         }
 
-        // TODO - store/use the world model to store the game state.
-
-        // TODO - handle communication with the server (our Networking class).
-
-        // TODO - draw the game state.
-
-
-        // Manage the GUI controls.
+        /* Manage the GUI controls. */
 
         /// <summary>
         ///     Handles when the pointer is changed.
@@ -154,23 +137,26 @@ namespace ClientGUI
         /// <param name="e"> The pointer event that is occurring </param>
         void PointerChanged(object sender, PointerEventArgs e)
         {
-            // Only positive and negative integers are acceptable
-            int floatToIntX = (int)ClientPlayer.X;
-            int floatToIntY = (int)ClientPlayer.Y;
-
-            string message = String.Format(Protocols.CMD_Move, floatToIntX, floatToIntY);
-
-            Match match = Regex.Match(message, Protocols.CMD_Move_Recognizer);
-            if (match.Success)
+            if (ClientPlayer != null)
             {
-                networking.Send(networking._tcpClient, message);
-            }
+                // Only positive and negative integers are acceptable
+                int floatToIntX = (int)ClientPlayer.X;
+                int floatToIntY = (int)ClientPlayer.Y;
 
-            // if pointer is changed,
-            // update the location of the ClientPlayer in the playsurface
-            // some code like this - e.GetPosition( playsurface )
-            // pointer at .X and .Y
-            // ...
+                string message = String.Format(Protocols.CMD_Move, floatToIntX, floatToIntY);
+
+                Match match = Regex.Match(message, Protocols.CMD_Move_Recognizer);
+                if (match.Success)
+                {
+                    networking.Send(networking._tcpClient, message);
+                }
+
+                // if pointer is changed,
+                // update the location of the ClientPlayer in the playsurface
+                // some code like this - e.GetPosition( playsurface )
+                // pointer at .X and .Y
+                // ...
+            }
         }
 
         /// <summary>
@@ -310,7 +296,7 @@ namespace ClientGUI
             string startGameMessage = string.Format(Protocols.CMD_Start_Game, playerName);
 
             // Check if it matches with Recognizer.
-            Match match = Regex.Match(playerName, Protocols.CMD_Start_Recognizer);
+            Match match = Regex.Match(startGameMessage, Protocols.CMD_Start_Recognizer);
             bool matchesWithRecognizer = match.Success;
 
             // If the name matches with the recognizer, then send the name of a ClientPlayer to a server.
@@ -327,6 +313,7 @@ namespace ClientGUI
         void OnDisconnect(Networking channel)
         {
             // Send a message to the server that this client is disconnected.
+            // Dead_Players?
         }
 
         /// <summary>
@@ -346,21 +333,20 @@ namespace ClientGUI
                     //world.FoodList.Add(food.ID, food);
                     worldDrawable.world.FoodList.Add(food.ID, food);
                 }
-
-                // TODO - Add in GUI as well.
             }
-            else if (message.StartsWith(Protocols.CMD_Player_Object))
+            if (message.StartsWith(Protocols.CMD_Player_Object))
             {
                 long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
 
-                // Add the ClientPlayer object into the PlayerList.
-                //world.PlayerList.Add(playerID, ClientPlayer);
-                worldDrawable.world.PlayerList.Add(playerID, ClientPlayer);
-                //ClientPlayer.ID = playerID;
+                // Create a random color and assign it to the ClientPlayer.
+                Random randomColor = new Random();
+                int argbcolor = randomColor.Next(int.MinValue, int.MaxValue);
+                ClientPlayer = new(playerID, 400, 400, argbcolor, 80);
 
-                // TODO - Remove in GUI as well.
+                // Add the ClientPlayer object into the PlayerList.
+                worldDrawable.world.PlayerList.Add(playerID, ClientPlayer);
             }
-            else if (message.StartsWith(Protocols.CMD_Dead_Players))
+            if (message.StartsWith(Protocols.CMD_Dead_Players))
             {
                 List<int> deadPlayers = JsonSerializer.Deserialize<List<int>>(message.Substring(Protocols.CMD_Dead_Players.Length));
 
@@ -369,10 +355,8 @@ namespace ClientGUI
                 {
                     worldDrawable.world.PlayerList.Remove(deadPlayerID);
                 }
-
-                // TODO - Remove in GUI as well.
             }
-            else if (message.StartsWith(Protocols.CMD_Eaten_Food))
+            if (message.StartsWith(Protocols.CMD_Eaten_Food))
             {
                 List<long> eatenFoods = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Eaten_Food.Length));
 
@@ -384,15 +368,12 @@ namespace ClientGUI
                         worldDrawable.world.FoodList.Remove(eatenFood);
                     }
                 }
-                // TODO - Remove in GUI as well.
             }
-            else if (message.StartsWith(Protocols.CMD_HeartBeat))
+            if (message.StartsWith(Protocols.CMD_HeartBeat))
             {
                 int heartBeat = JsonSerializer.Deserialize<int>(message.Substring(Protocols.CMD_HeartBeat.Length));
-
-                // TODO - Use this in the information label.
             }
-            else if (message.StartsWith(Protocols.CMD_Update_Players))
+            if (message.StartsWith(Protocols.CMD_Update_Players))
             {
                 List<Player> updatePlayers = JsonSerializer.Deserialize<List<Player>>(message.Substring(Protocols.CMD_Update_Players.Length));
 
@@ -405,9 +386,11 @@ namespace ClientGUI
                         var updatedPlayer = worldDrawable.world.PlayerList.TryGetValue(player.ID, out Player newPlayer);
                         newPlayer = player;
                     }
+                    else
+                    {
+                        worldDrawable.world.PlayerList.Add(player.ID, player);
+                    }
                 }
-
-                // TODO - use this in GUI as well.
             }
         }
 

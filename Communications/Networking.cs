@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -268,9 +269,25 @@ namespace Communications
 
                     _logger.LogInformation($" Received {total} new bytes for a total of {current_data.Length}.");
 
+                    try
+                    {
+                        _logger.LogInformation("This line is in ParseMessageHandler.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Logger error: {ex.Message}");
+                    }
+
                     if (ParseMessageHandler(dataBacklog, out parsedOutMessage))
                     {
-                        _logger.LogInformation($"This is the message: {parsedOutMessage}");
+                        try
+                        {
+                            _logger.LogInformation($"This is the message: {parsedOutMessage}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Logger error: {ex.Message}");
+                        }
                         _handleMessage(this, parsedOutMessage);
                     }
                 }

@@ -24,18 +24,27 @@ using System.Threading.Tasks;
 /// </summary>
 namespace AgarioModels
 {
+    /// <summary>
+    ///     A class representing a palyer in Agar.io.
+    /// </summary>
     public class Player : GameObject
     {
-        public string Name { get; set; } = "";
+        /// <summary>
+        ///     The name of the player.
+        /// </summary>
+        public string Name { get; set; }
 
+        /// <summary>
+        /// Creates a new instance of the Player class with the specified parameters.
+        /// </summary>
+        /// <param name="ID">The ID of the player.</param>
+        /// <param name="X">The X-coordinate of the player's location.</param>
+        /// <param name="Y">The Y-coordinate of the player's location.</param>
+        /// <param name="ARGBColor">The color of the player's avatar, specified as an ARGB value.</param>
+        /// <param name="Mass">The mass of the player's avatar.</param>
         [JsonConstructor]
         public Player(long ID, float X, float Y, int ARGBColor, float Mass) : base(ID, X, Y, ARGBColor, Mass)
         {
-        }
-
-        public Player()
-        {
-
         }
     }
 }

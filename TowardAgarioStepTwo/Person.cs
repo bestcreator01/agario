@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -24,29 +19,29 @@ using System.Threading.Tasks;
 namespace TowardAgarioStepTwo
 {
     /// <summary>
-    ///     
+    ///     A base class representing a person.
     /// </summary>
     [JsonDerivedType(typeof(Person), typeDiscriminator: "Person")]
     [JsonDerivedType(typeof(Student), typeDiscriminator: "Student")]
     public class Person
     {
         /// <summary>
-        ///     
+        ///     A static field to keep track of the next available ID for a person.  
         /// </summary>
         private static int nextId = 0;
 
         /// <summary>
-        ///     
+        ///     The GPA (grade point average) of the person.  
         /// </summary>
         public float GPA { get; protected set; } = 4;
 
         /// <summary>
-        ///     
+        ///     The unique identifier of the person.
         /// </summary>
         public int ID { get; protected set; }
 
         /// <summary>
-        ///     
+        ///     The name of the person. 
         /// </summary>
         public string Name { get; protected set; } = "Jim";
 

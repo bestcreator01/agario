@@ -19,6 +19,9 @@ using System.Collections;
 /// </summary>
 namespace ClientGUI
 {
+    /// <summary>
+    ///     This class represents a drawable world.
+    /// </summary>
     public class WorldDrawable : IDrawable
     {
         /// <summary>
@@ -42,14 +45,15 @@ namespace ClientGUI
         public World world;
         public GameObject gameObject;
 
+        /// <summary>
+        ///     The screen width.
+        /// </summary>
         private int screenWidth;
-        private int screenHeight;
 
-        ///// <summary>
-        /////     
-        ///// </summary>
-        //private IEnumerable<Food> foodList;
-        //private IEnumerable<Player> playerList;
+        /// <summary>
+        ///     The screen height.
+        /// </summary>
+        private int screenHeight;
 
         /// <summary>
         ///     Constructor of WorldDrawable
@@ -59,8 +63,6 @@ namespace ClientGUI
             world = new();
             gameObject = new();
             this.gv = gv;
-            //foodList = world.FoodList.Values;
-            //playerList = world.PlayerList.Values;
         }
 
         /// <summary>
@@ -104,16 +106,16 @@ namespace ClientGUI
             foreach (var obj in gameObject)
             {
                 // Assign the parameters you need for drawing objects.
-                float x = 0; float y = 0; float radius = 0; int color = 0;
+                float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
 
                 // Declare the values of x, y, and radius depending on what object it is.
                 if (obj is Food food)
                 {
-                    x = food.X;
-                    y = food.Y;
+                    worldCircleX = food.X;
+                    worldCircleY = food.Y;
                     radius = food.CircleRadius;
                     color = food.ARGBColor;
-                    ConvertFromWorldToScreenFood(x, y, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
+                    ConvertFromWorldToScreenFood(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
 
                     // Draw on canvas
                     canvas.FillColor = Color.FromInt(color);
@@ -122,15 +124,15 @@ namespace ClientGUI
                 }
                 else if (obj is Player player)
                 {
-                    x = player.X;
-                    y = player.Y;
-                    radius = player.CircleRadius; // TODO - Set the circle radius of players bigger than foods.
+                    worldCircleX = player.X;
+                    worldCircleY = player.Y;
                     color = player.ARGBColor;
-                    ConvertFromWorldToScreenFood(x, y, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
+                    ConvertFromWorldToScreenFood(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenCircleX, out int screenCircleY, screenWidth, screenHeight);
+                    radius = (float)(Math.Sqrt(player.Mass / Math.PI)); // TODO - Set the circle radius of players bigger than foods.
 
                     // Draw on canvas
                     canvas.FillColor = Color.FromInt(color);
-                    canvas.FillCircle(screenX, screenY, radius);
+                    canvas.FillCircle(screenCircleX, screenCircleY, radius);
 
                 }
             }
@@ -163,16 +165,17 @@ namespace ClientGUI
         }
 
         /// <summary>
-        ///     
+        ///      Converts a food object's position from world coordinates 
+        ///      to screen coordinates.
         /// </summary>
-        /// <param name="worldCircleX"></param>
-        /// <param name="worldCircleY"></param>
-        /// <param name="worldWidth"></param>
-        /// <param name="worldHeight"></param>
-        /// <param name="screenCircleX"></param>
-        /// <param name="screenCircleY"></param>
-        /// <param name="screenWidth"></param>
-        /// <param name="screenHeight"></param>
+        /// <param name="worldCircleX">The X coordinate of the food object in world coordinates.</param>
+        /// <param name="worldCircleY">The Y coordinate of the food object in world coordinates.</param>
+        /// <param name="worldWidth">The width of the world in world coordinates.</param>
+        /// <param name="worldHeight">The height of the world in world coordinates.</param>
+        /// <param name="screenCircleX">The X coordinate of the food object in screen coordinates.</param>
+        /// <param name="screenCircleY">The Y coordinate of the food object in screen coordinates.</param>
+        /// <param name="screenWidth">The width of the screen in pixels.</param>
+        /// <param name="screenHeight">The height of the screen in pixels.</param>        
         private void ConvertFromWorldToScreenFood(
             in float worldCircleX, in float worldCircleY, in float worldWidth, in float worldHeight,
             out int screenCircleX, out int screenCircleY, in int screenWidth, in int screenHeight)

@@ -32,7 +32,7 @@ in Academic Coursework.
 
 	1. Assignment Eight - Agario Client
 		Predicted Hours:	22
-		Actual Hours:		5 + 5
+		Actual Hours:		5 + 5 + 8
 
 		Note:
 
@@ -72,7 +72,6 @@ in Academic Coursework.
 		avoid over-engineering and to keep the system simple and focused. Developers can focus
 		on delivering the most important functionality first, and only add additional functionality
 		as it is needed.
-
 
 # Branching
 

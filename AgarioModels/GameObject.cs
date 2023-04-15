@@ -27,41 +27,68 @@ using System.Threading.Tasks;
 namespace AgarioModels
 {
     /// <summary>
-    ///     This class represents a game object.
+    ///     A class representing a generic game object in the Agario game.
     /// </summary>
     public class GameObject
     {
+        /// <summary>
+        ///     Gets the unique identifier of the game object.
+        /// </summary>
         public long ID { get; private set; }
+
+        /// <summary>
+        ///     Gets the location of the game object as a 2D vector.
+        /// </summary>
         public Vector2 Location { get; private set; }
+
+        /// <summary>
+        ///     Gets the X coordinate of the game object in the game world.
+        /// </summary>
         public float X { get { return Location.X; } }
+
+        /// <summary>
+        ///     Gets the Y coordinate of the game object in the game world.
+        /// </summary>
         public float Y { get { return Location.Y; } }
+
+        /// <summary>
+        ///     Gets the ARGB color of the game object.
+        /// </summary>
         public int ARGBColor { get; private set; }
+
+        /// <summary>
+        ///     Gets or sets the radius of the game object's circular shape.
+        /// </summary>
         public float CircleRadius { get; private set; } = 3;
-        public float Mass 
-        { 
-            get 
+
+        /// <summary>
+        ///     Gets the mass of the game object, which is calculated from its radius.
+        /// </summary>
+        public float Mass
+        {
+            get
             {
                 if (_mass > 0)
                     return _mass;
                 else
-                    return (float)(Math.PI * CircleRadius * CircleRadius); 
+                    return (float)(Math.PI * CircleRadius * CircleRadius);
             }
             private set { _mass = value; }
         }
 
         /// <summary>
-        ///     Fields
+        ///     Backing field for the Mass property.
         /// </summary>
         private float _mass;
 
         /// <summary>
-        ///     Constructor
+        ///     A class representing a generic game object in the Agario game.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="ARGBcolor"></param>
-        /// <param name="circleRadius"></param>
+        /// <param name="ID">The unique identifier of the game object.</param>
+        /// <param name="x">The X coordinate of the game object in the game world</param>
+        /// <param name="y">The Y coordinate of the game object in the game world.</param>
+        /// <param name="ARGBcolor">The ARGB color of the game object.</param>
+        /// <param name="Mass">The mass of the game object.</param>
         public GameObject(long ID, float x, float y, int ARGBcolor, float Mass)
         {
             this.ID = ID;
@@ -70,6 +97,9 @@ namespace AgarioModels
             this.Mass = Mass;
         }
 
+        /// <summary>
+        ///     Constructs a new, empty instance of the GameObject class.
+        /// </summary>
         public GameObject()
         {
 

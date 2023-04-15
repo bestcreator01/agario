@@ -25,8 +25,19 @@ using System.Threading.Tasks;
 /// </summary>
 namespace AgarioModels
 {
+    /// <summary>
+    ///     A class representing a food object in the game world.
+    /// </summary>
     public class Food : GameObject
     {
+        /// <summary>
+        ///     Constructs a new instance of the Food class with the specified parameters.
+        /// </summary>
+        /// <param name="ID">The unique identifier of the food object.</param>
+        /// <param name="X">The X coordinate of the food object in the game world.</param>
+        /// <param name="Y">The Y coordinate of the food object in the game world.</param>
+        /// <param name="ARGBColor">The color of the food object in ARGB format.</param>
+        /// <param name="Mass">The mass of the food object.</param>
         [JsonConstructor]
         public Food(long ID, float X, float Y, int ARGBColor, float Mass) : base(ID, X, Y, ARGBColor, Mass)
         {

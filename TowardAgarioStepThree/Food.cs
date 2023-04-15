@@ -1,12 +1,4 @@
-﻿using Communications;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-/// <summary>
+﻿/// <summary>
 /// Author:     Seoin Kim and Gloria Shin
 /// Partner:    Seoin Kim and Gloria Shin
 /// Date:       14-Apr-2023
@@ -24,25 +16,28 @@ using System.Threading.Tasks;
 /// </summary>
 namespace TowardAgarioStepThree
 {
+    /// <summary>
+    ///     A class representing a food object in the Agario world.
+    /// </summary>
     public class Food
     {
         /// <summary>
-        ///  TODO
+        ///     The x-coordinate of the food.
         /// </summary>
         public float X { get; set; }
 
         /// <summary>
-        ///  TODO
+        ///     The y-coordinate of the food.
         /// </summary>
         public float Y { get; set; }
 
         /// <summary>
-        ///  TODO
+        ///     The ARGB color code of the food.
         /// </summary>
         public int ARGBcolor { get; set; }
 
         /// <summary>
-        ///  TODO
+        ///     The mass of the food.
         /// </summary>
         public float Mass { get; set; }
 

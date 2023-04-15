@@ -19,7 +19,7 @@
 namespace AgarioModels
 {
     /// <summary>
-    /// 
+    ///     A class representing the game world in Agar.io.
     /// </summary>
     public class World
     {

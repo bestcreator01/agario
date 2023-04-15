@@ -31,7 +31,10 @@ public partial class MainPage : ContentPage
     ///     The WorldDrawable field.
     /// </summary>
     public WorldDrawable worldDrawable;
-    
+
+    /// <summary>
+    ///     The timestamp of the last frame rendered in the game.
+    /// </summary>
     public DateTime lastFrameTime;
 
     /// <summary>
@@ -46,7 +49,6 @@ public partial class MainPage : ContentPage
     /// <summary>
     ///    This method will be called every time the window is resized
     ///    including the first time the window "shows up" on the screen.
-    ///    TODO - a perfect place to put some initialization code.
     /// </summary>
     /// <param name="width"> the width of the window </param>
     /// <param name="height"> the height of the window </param>
@@ -65,7 +67,6 @@ public partial class MainPage : ContentPage
     /// <summary>
     ///     Initializes the game logic.
     /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
     private void InitializeGameLogic()
     {
         // Assign your WorldDrawable to the PlaySurface.Drawable property.
