@@ -42,6 +42,9 @@ namespace ClientGUI
         public World world;
         public GameObject gameObject;
 
+        private int screenWidth;
+        private int screenHeight;
+
         ///// <summary>
         /////     
         ///// </summary>
@@ -69,11 +72,14 @@ namespace ClientGUI
         {
             DrawPlaySurface(canvas);
 
-            //DrawGameObject(canvas, foodList);
-            DrawGameObject(canvas, world.FoodList);
-
-            //DrawGameObject(canvas, playerList);
-            DrawGameObject(canvas, world.PlayerList);
+            if (world.FoodList.Count > 0)
+            {
+                DrawGameObject(canvas, world.FoodList.Values);
+            }
+            if (world.PlayerList.Count > 0)
+            {
+                DrawGameObject(canvas, world.PlayerList.Values);
+            }
         }
 
         /// <summary>
@@ -82,7 +88,7 @@ namespace ClientGUI
         /// <param name="canvas"> The canvas object to draw on. </param>
         private void DrawPlaySurface(ICanvas canvas)
         {
-            ConvertFromWorldToScreen(world.WindowWidth, world.WindowHeight, out int Width, out int Height);
+            ConvertFromWorldToScreen(world.WindowWidth, world.WindowHeight, out screenWidth, out screenHeight);
             canvas.FillColor = Colors.LightPink;
             canvas.StrokeColor = Colors.Black;
             canvas.StrokeSize = 2;
@@ -107,6 +113,12 @@ namespace ClientGUI
                     y = food.Y;
                     radius = food.CircleRadius;
                     color = food.ARGBColor;
+                    ConvertFromWorldToScreenFood(x, y, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
+
+                    // Draw on canvas
+                    canvas.FillColor = Color.FromInt(color);
+                    canvas.FillCircle(screenX, screenY, radius);
+
                 }
                 else if (obj is Player player)
                 {
@@ -114,11 +126,13 @@ namespace ClientGUI
                     y = player.Y;
                     radius = player.CircleRadius; // TODO - Set the circle radius of players bigger than foods.
                     color = player.ARGBColor;
-                }
+                    ConvertFromWorldToScreenFood(x, y, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
 
-                // Draw on canvas.
-                canvas.FillColor = Color.FromInt(color);
-                canvas.FillCircle(x, y, radius);
+                    // Draw on canvas
+                    canvas.FillColor = Color.FromInt(color);
+                    canvas.FillCircle(screenX, screenY, radius);
+
+                }
             }
         }
 
@@ -146,6 +160,28 @@ namespace ClientGUI
             // Calculate the screen coordinates based on the lecture slides.
             screen_w = (int)(world_w / 5000.0F * Width);
             screen_h = (int)(world_h / 5000.0F * Height);
+        }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        /// <param name="worldCircleX"></param>
+        /// <param name="worldCircleY"></param>
+        /// <param name="worldWidth"></param>
+        /// <param name="worldHeight"></param>
+        /// <param name="screenCircleX"></param>
+        /// <param name="screenCircleY"></param>
+        /// <param name="screenWidth"></param>
+        /// <param name="screenHeight"></param>
+        private void ConvertFromWorldToScreenFood(
+            in float worldCircleX, in float worldCircleY, in float worldWidth, in float worldHeight,
+            out int screenCircleX, out int screenCircleY, in int screenWidth, in int screenHeight)
+        {
+            float w_percentage = (float)(worldCircleX / worldWidth);
+            float h_percentage = (float)(worldCircleY / worldHeight);
+
+            screenCircleX = (int)(w_percentage * screenWidth);
+            screenCircleY = (int)(h_percentage * screenHeight);
         }
     }
 }

@@ -173,8 +173,6 @@ namespace ClientGUI
             // ...
         }
 
-
-
         /// <summary>
         ///     Handles when the spacebar is tapped.
         /// </summary>
@@ -285,6 +283,7 @@ namespace ClientGUI
             new Thread(() => networking.AwaitMessagesAsync(infinite: true)).Start();
             worldDrawable = new(PlaySurface);
             InitializeGameLogic();
+
             //ClientPlayer = new();
             //world = new();
 
@@ -337,83 +336,80 @@ namespace ClientGUI
         /// <param name="message"> The message that was received. </param>
         void OnMessage(Networking channel, string message)
         {
-            lock (worldDrawable)
+            if (message.StartsWith(Protocols.CMD_Food))
             {
+                List<Food> foodList = JsonSerializer.Deserialize<List<Food>>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
 
-                if (message.StartsWith(Protocols.CMD_Food))
+                // Add the deserialized elements into the FoodList.
+                foreach (var food in foodList)
                 {
-                    List<Food> foodList = JsonSerializer.Deserialize<List<Food>>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
+                    //world.FoodList.Add(food.ID, food);
+                    worldDrawable.world.FoodList.Add(food.ID, food);
+                }
 
-                    // Add the deserialized elements into the FoodList.
-                    foreach (var food in foodList)
+                // TODO - Add in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_Player_Object))
+            {
+                long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
+
+                // Add the ClientPlayer object into the PlayerList.
+                //world.PlayerList.Add(playerID, ClientPlayer);
+                worldDrawable.world.PlayerList.Add(playerID, ClientPlayer);
+                //ClientPlayer.ID = playerID;
+
+                // TODO - Remove in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_Dead_Players))
+            {
+                List<int> deadPlayers = JsonSerializer.Deserialize<List<int>>(message.Substring(Protocols.CMD_Dead_Players.Length));
+
+                // Iterate over the ID of each dead ClientPlayer in deadPlayers.
+                foreach (int deadPlayerID in deadPlayers)
+                {
+                    worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                }
+
+                // TODO - Remove in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_Eaten_Food))
+            {
+                List<long> eatenFoods = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Eaten_Food.Length));
+
+                // Remove all eaten food objects in the food list
+                foreach (var eatenFood in eatenFoods)
+                {
+                    if (worldDrawable.world.FoodList.ContainsKey(eatenFood))
                     {
-                        //world.FoodList.Add(food.ID, food);
-                        worldDrawable.world.FoodList.Add(food.ID, food);
+                        worldDrawable.world.FoodList.Remove(eatenFood);
                     }
-
-                    // TODO - Add in GUI as well.
                 }
-                else if (message.StartsWith(Protocols.CMD_Player_Object))
+                // TODO - Remove in GUI as well.
+            }
+            else if (message.StartsWith(Protocols.CMD_HeartBeat))
+            {
+                int heartBeat = JsonSerializer.Deserialize<int>(message.Substring(Protocols.CMD_HeartBeat.Length));
+
+                // TODO - Use this in the information label.
+            }
+            else if (message.StartsWith(Protocols.CMD_Update_Players))
+            {
+                List<Player> updatePlayers = JsonSerializer.Deserialize<List<Player>>(message.Substring(Protocols.CMD_Update_Players.Length));
+
+                // Iterate through the updated list of players.
+                foreach (var player in updatePlayers)
                 {
-                    long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
-
-                    // Add the ClientPlayer object into the PlayerList.
-                    //world.PlayerList.Add(playerID, ClientPlayer);
-                    worldDrawable.world.PlayerList.Add(playerID, ClientPlayer);
-                    //ClientPlayer.ID = playerID;
-
-                    // TODO - Remove in GUI as well.
-                }
-                else if (message.StartsWith(Protocols.CMD_Dead_Players))
-                {
-                    List<int> deadPlayers = JsonSerializer.Deserialize<List<int>>(message.Substring(Protocols.CMD_Dead_Players.Length));
-
-                    // Iterate over the ID of each dead ClientPlayer in deadPlayers.
-                    foreach (int deadPlayerID in deadPlayers)
+                    // If playerList contains the appropriate ClientPlayer ID, update ClientPlayer information.
+                    if (worldDrawable.world.PlayerList.ContainsKey(player.ID))
                     {
-                        worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                        var updatedPlayer = worldDrawable.world.PlayerList.TryGetValue(player.ID, out Player newPlayer);
+                        newPlayer = player;
                     }
-
-                    // TODO - Remove in GUI as well.
                 }
-                else if (message.StartsWith(Protocols.CMD_Eaten_Food))
-                {
-                    List<long> eatenFoods = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Eaten_Food.Length));
 
-                    // Remove all eaten food objects in the food list
-                    foreach (var eatenFood in eatenFoods)
-                    {
-                        if (worldDrawable.world.FoodList.ContainsKey(eatenFood))
-                        {
-                            worldDrawable.world.FoodList.Remove(eatenFood);
-                        }
-                    }
-                    // TODO - Remove in GUI as well.
-                }
-                else if (message.StartsWith(Protocols.CMD_HeartBeat))
-                {
-                    int heartBeat = JsonSerializer.Deserialize<int>(message.Substring(Protocols.CMD_HeartBeat.Length));
-
-                    // TODO - Use this in the information label.
-                }
-                else if (message.StartsWith(Protocols.CMD_Update_Players))
-                {
-                    List<Player> updatePlayers = JsonSerializer.Deserialize<List<Player>>(message.Substring(Protocols.CMD_Update_Players.Length));
-
-                    // Iterate through the updated list of players.
-                    foreach (var player in updatePlayers)
-                    {
-                        // If playerList contains the appropriate ClientPlayer ID, update ClientPlayer information.
-                        if (worldDrawable.world.PlayerList.ContainsKey(player.ID))
-                        {
-                            var updatedPlayer = worldDrawable.world.PlayerList.TryGetValue(player.ID, out Player newPlayer);
-                            newPlayer = player;
-                        }
-                    }
-
-                    // TODO - use this in GUI as well.
-                }
+                // TODO - use this in GUI as well.
             }
         }
+
     }
 }
