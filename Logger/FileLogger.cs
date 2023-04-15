@@ -42,15 +42,7 @@ namespace Logger
         public FileLogger(string name)
         {
             _name = name;
-
-            // Get the path to the ApplicationData folder and create the file name.
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string logFolderPath = Path.Combine(appDataPath, "CS3500");
-            if (!Directory.Exists(logFolderPath))
-            {
-                Directory.CreateDirectory(logFolderPath);
-            }
-            _fileName = Path.Combine(logFolderPath, $"{name}.log");
+            _fileName = name;
         }
 
         /// <summary>
@@ -146,7 +138,7 @@ namespace Logger
             }
 
             // Create a new file with a unique name based on the category name.
-            string filename = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + $"CS3500-{categoryName}.log";
+            string filename = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + Path.DirectorySeparatorChar + $"CS3500-{categoryName}.log";
             File.WriteAllText(filename, string.Empty);
 
             // Create a new instance of the FileLogger class with the unique file name.
