@@ -41,6 +41,7 @@ namespace ClientGUI
         ///// </summary>
         public WorldDrawable worldDrawable;
 
+        public World world;
         /// <summary>
         ///     The Networking field for a client to connect to a server.
         /// </summary>
@@ -56,7 +57,10 @@ namespace ClientGUI
         /// </summary>
         public DateTime lastFrameTime;
 
-        private Player ClientPlayer = null;
+        private Player ClientPlayer = new();
+
+        private IEnumerable<Food> foodList;
+        private IEnumerable<Player> playersList;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
@@ -64,7 +68,7 @@ namespace ClientGUI
         public MainPage(ILogger<MainPage> _logger)
         {
             InitializeComponent();
-            //worldDrawable = new(PlaySurface);
+            worldDrawable = new(PlaySurface);
             logger = _logger;
         }
 
@@ -280,7 +284,8 @@ namespace ClientGUI
             new Thread(() => networking.AwaitMessagesAsync(infinite: true)).Start();
             worldDrawable = new(PlaySurface);
             InitializeGameLogic();
-            ClientPlayer = new();
+            //ClientPlayer = new();
+            world = new();
 
             // Frontend (GUI) part
             Dispatcher.Dispatch(() =>
@@ -333,12 +338,12 @@ namespace ClientGUI
         {
             if (message.StartsWith(Protocols.CMD_Food))
             {
-                Food[] foods = JsonSerializer.Deserialize<Food[]>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
-                
+                List<Food> foodList = JsonSerializer.Deserialize<List<Food>>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
+
                 // Add the deserialized elements into the FoodList.
-                foreach (var food in foods)
+                foreach (var food in foodList)
                 {
-                    worldDrawable.world.FoodList.Add(food.ID, food);
+                    world.FoodList.Add(food.ID, food);
                 }
 
                 // TODO - Add in GUI as well.
@@ -348,8 +353,8 @@ namespace ClientGUI
                 long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
 
                 // Add the ClientPlayer object into the PlayerList.
-                worldDrawable.world.PlayerList.Add(playerID, ClientPlayer);
-                ClientPlayer.ID = playerID;
+                world.PlayerList.Add(playerID, ClientPlayer);
+                //ClientPlayer.ID = playerID;
 
                 // TODO - Remove in GUI as well.
             }

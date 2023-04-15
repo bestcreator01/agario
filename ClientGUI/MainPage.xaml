@@ -54,7 +54,7 @@
                             FontAttributes="Bold"/>
                         <Entry
                             x:Name="EntryPlayerName"
-                            Text="test"
+                            Text=""
                             TextColor="Black"
                             BackgroundColor="GhostWhite"
                             WidthRequest="300"/>
@@ -63,32 +63,31 @@
                     <HorizontalStackLayout
                     Spacing="93">
                         <Label 
-                        x:Name="LabelServer"
-                        Text="Server"
-                        TextColor="Black"
-                        FontAttributes="Bold"/>
+                            x:Name="LabelServer"
+                            Text="Server"
+                            TextColor="Black"
+                            FontAttributes="Bold"/>
                         <Entry
-                        x:Name="EntryServer"
-                        Text="localhost"
-                        TextColor="Black"
-                        BackgroundColor="GhostWhite"
-                        WidthRequest="300"/>
-                        <!--TextChanged="OnServerChanged"/>-->
+                            x:Name="EntryServer"
+                            Text="localhost"
+                            TextColor="Black"
+                            BackgroundColor="GhostWhite"
+                            WidthRequest="300"/>
                     </HorizontalStackLayout>
 
                     <Button
-                    x:Name="StartGameButton"
-                    Text="Start Game"
-                    TextColor="Black"
-                    Clicked="StartGameButtonClicked"
-                    BackgroundColor="Pink"/>
+                        x:Name="StartGameButton"
+                        Text="Start Game"
+                        TextColor="Black"
+                        Clicked="StartGameButtonClicked"
+                        BackgroundColor="Pink"/>
 
                     <Label
-                    x:Name="Warning"
-                    IsVisible="false"
-                    Text=""
-                    TextColor="Red"
-                    HorizontalOptions="Center"/>
+                        x:Name="Warning"
+                        IsVisible="false"
+                        Text=""
+                        TextColor="Red"
+                        HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>

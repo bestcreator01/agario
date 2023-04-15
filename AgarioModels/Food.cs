@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -24,5 +27,24 @@ namespace AgarioModels
 {
     public class Food : GameObject
     {
+        /// <summary>
+        ///     Food elements (fields)
+        /// </summary>
+        private long   FoodID;
+        private float  FoodX;
+        private float  FoodY;
+        private int    FoodARGBcolor;
+        private float  FoodMass;
+
+        [JsonConstructor]
+        public Food(long ID, float X, float Y, int ARGBcolor, float Mass) : base(ID, X, Y, ARGBcolor, Mass)
+        {
+            this.FoodID = ID;
+            this.FoodX = X;
+            this.FoodY = Y;
+            this.FoodARGBcolor = ARGBcolor;
+            this.FoodMass = Mass;
+        }
+
     }
 }

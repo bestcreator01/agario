@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -33,12 +34,12 @@ namespace AgarioModels
         /// <summary>
         ///     Gets or sets the unique identifier for the object.
         /// </summary>
-        public long ID { get; set; }
+        public long ID { get; private set; }
 
         /// <summary>
         ///     Gets or sets the location of the object in 2D space.
         /// </summary>
-        public Vector2 Location { get; set; }
+        public Vector2 Location { get; private set; }
 
         /// <summary>
         ///     Gets the X-coordinate of the object's location.
@@ -65,12 +66,12 @@ namespace AgarioModels
         /// <summary>
         ///     Gets or sets the ARGB color value of the object.
         /// </summary>
-        public int ARGBcolor { get; set; }
+        public int ARGBcolor { get; private set; }
 
         /// <summary>
         ///     Gets or sets the radius of the circle.
         /// </summary>
-        public float CircleRadius { get; set; }
+        public float CircleRadius { get; private set; }
 
         /// <summary>
         ///     Gets or sets the mass of the object.
@@ -81,6 +82,22 @@ namespace AgarioModels
             {
                 return (float)(Math.PI * CircleRadius * CircleRadius);
             }
+
+            private set { }
+        }
+
+        [JsonConstructor]
+        public GameObject(long ID, float X, float Y, int ARGBcolor, float Mass)
+        {
+            this.ID = ID;
+            this.Location = new Vector2(X, Y);
+            this.ARGBcolor = ARGBcolor;
+            this.Mass = Mass;
+        }
+
+        public GameObject()
+        {
+
         }
 
         /// <summary>

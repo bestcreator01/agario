@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +26,29 @@ namespace AgarioModels
 {
     public class Player : GameObject
     {
+        /// <summary>
+        ///     Player elements (fields).
+        /// </summary>
+        private long   PlayerID;
+        private float  PlayerX;
+        private float  PlayerY;
+        private int    PlayerARGBcolor;
+        private float  PlayerMass;
         public string Name = "";
+
+        [JsonConstructor]
+        public Player(long ID, float X, float Y, int ARGBcolor, float Mass) : base(ID, X, Y, ARGBcolor, Mass)
+        {
+            this.PlayerID = ID;
+            this.PlayerX = X;
+            this.PlayerY = Y;
+            this.PlayerARGBcolor = ARGBcolor;
+            this.PlayerMass = Mass;
+        }
+
+        public Player()
+        {
+
+        }
     }
 }

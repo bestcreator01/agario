@@ -53,8 +53,8 @@ namespace ClientGUI
         /// </summary>
         public WorldDrawable(GraphicsView gv)
         {
-            world = new World();
-            gameObject = new GameObject();
+            world = new();
+            gameObject = new();
             this.gv = gv;
             foodList = world.FoodList.Values;
             playerList = world.PlayerList.Values;
