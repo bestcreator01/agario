@@ -54,7 +54,7 @@
                             FontAttributes="Bold"/>
                         <Entry
                             x:Name="EntryPlayerName"
-                            Text=""
+                            Text="hello"
                             TextColor="Black"
                             BackgroundColor="GhostWhite"
                             WidthRequest="300"/>

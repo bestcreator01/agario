@@ -42,11 +42,11 @@ namespace ClientGUI
         public World world;
         public GameObject gameObject;
 
-        /// <summary>
-        ///     
-        /// </summary>
-        private readonly IEnumerable<Food> foodList;
-        private readonly IEnumerable<Player> playerList;
+        ///// <summary>
+        /////     
+        ///// </summary>
+        //private IEnumerable<Food> foodList;
+        //private IEnumerable<Player> playerList;
 
         /// <summary>
         ///     Constructor of WorldDrawable
@@ -56,8 +56,8 @@ namespace ClientGUI
             world = new();
             gameObject = new();
             this.gv = gv;
-            foodList = world.FoodList.Values;
-            playerList = world.PlayerList.Values;
+            //foodList = world.FoodList.Values;
+            //playerList = world.PlayerList.Values;
         }
 
         /// <summary>
@@ -69,9 +69,11 @@ namespace ClientGUI
         {
             DrawPlaySurface(canvas);
 
-            DrawGameObject(canvas, foodList);
+            //DrawGameObject(canvas, foodList);
+            DrawGameObject(canvas, world.FoodList);
 
-            DrawGameObject(canvas, playerList);
+            //DrawGameObject(canvas, playerList);
+            DrawGameObject(canvas, world.PlayerList);
         }
 
         /// <summary>
@@ -104,14 +106,14 @@ namespace ClientGUI
                     x = food.X;
                     y = food.Y;
                     radius = food.CircleRadius;
-                    color = food.ARGBcolor;
+                    color = food.ARGBColor;
                 }
                 else if (obj is Player player)
                 {
                     x = player.X;
                     y = player.Y;
                     radius = player.CircleRadius; // TODO - Set the circle radius of players bigger than foods.
-                    color = player.ARGBcolor;
+                    color = player.ARGBColor;
                 }
 
                 // Draw on canvas.
