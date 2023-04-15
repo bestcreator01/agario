@@ -26,24 +26,11 @@ namespace AgarioModels
 {
     public class Player : GameObject
     {
-        /// <summary>
-        ///     Player elements (fields).
-        /// </summary>
-        private long   PlayerID;
-        private float  PlayerX;
-        private float  PlayerY;
-        private int    PlayerARGBcolor;
-        private float  PlayerMass;
-        public string Name = "";
+        public string Name { get; set; } = "";
 
         [JsonConstructor]
-        public Player(long ID, float X, float Y, int ARGBcolor, float Mass) : base(ID, X, Y, ARGBcolor, Mass)
+        public Player(long ID, float X, float Y, int ARGBColor, float Mass) : base(ID, X, Y, ARGBColor, Mass)
         {
-            this.PlayerID = ID;
-            this.PlayerX = X;
-            this.PlayerY = Y;
-            this.PlayerARGBcolor = ARGBcolor;
-            this.PlayerMass = Mass;
         }
 
         public Player()

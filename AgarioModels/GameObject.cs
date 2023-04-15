@@ -31,67 +31,42 @@ namespace AgarioModels
     /// </summary>
     public class GameObject
     {
-        /// <summary>
-        ///     Gets or sets the unique identifier for the object.
-        /// </summary>
         public long ID { get; private set; }
-
-        /// <summary>
-        ///     Gets or sets the location of the object in 2D space.
-        /// </summary>
         public Vector2 Location { get; private set; }
-
-        /// <summary>
-        ///     Gets the X-coordinate of the object's location.
-        /// </summary>
-        public float X
-        {
-            get
-            {
-                return Location.X;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the Y-coordinate of the object's location.
-        /// </summary>
-        public float Y 
-        { 
-            get 
-            { 
-                return Location.Y; 
-            } 
-        }
-
-        /// <summary>
-        ///     Gets or sets the ARGB color value of the object.
-        /// </summary>
-        public int ARGBcolor { get; private set; }
-
-        /// <summary>
-        ///     Gets or sets the radius of the circle.
-        /// </summary>
+        public float X { get { return Location.X; } }
+        public float Y { get { return Location.Y; } }
+        public int ARGBColor { get; private set; }
         public float CircleRadius { get; private set; }
-
-        /// <summary>
-        ///     Gets or sets the mass of the object.
-        /// </summary>
         public float Mass 
         { 
             get 
             {
-                return (float)(Math.PI * CircleRadius * CircleRadius);
+                if (_mass > 0)
+                    return _mass;
+                else
+                    return (float)(Math.PI * CircleRadius * CircleRadius); 
             }
-
-            private set { }
+            private set { _mass = value; }
         }
 
-        [JsonConstructor]
-        public GameObject(long ID, float X, float Y, int ARGBcolor, float Mass)
+        /// <summary>
+        ///     Fields
+        /// </summary>
+        private float _mass;
+
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="ARGBcolor"></param>
+        /// <param name="circleRadius"></param>
+        public GameObject(long ID, float x, float y, int ARGBcolor, float Mass)
         {
             this.ID = ID;
-            this.Location = new Vector2(X, Y);
-            this.ARGBcolor = ARGBcolor;
+            this.Location = new Vector2(x, y);
+            this.ARGBColor = ARGBcolor;
             this.Mass = Mass;
         }
 
