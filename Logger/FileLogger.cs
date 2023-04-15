@@ -44,9 +44,13 @@ namespace Logger
             _name = name;
 
             // Get the path to the ApplicationData folder and create the file name.
-            _fileName = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-               + Path.DirectorySeparatorChar
-               + $"CS3500-{name}.log";
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string logFolderPath = Path.Combine(appDataPath, "CS3500");
+            if (!Directory.Exists(logFolderPath))
+            {
+                Directory.CreateDirectory(logFolderPath);
+            }
+            _fileName = Path.Combine(logFolderPath, $"{name}.log");
         }
 
         /// <summary>
