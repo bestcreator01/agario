@@ -46,5 +46,6 @@ namespace AgarioModels
         public Player(long ID, float X, float Y, int ARGBColor, float Mass) : base(ID, X, Y, ARGBColor, Mass)
         {
         }
+
     }
 }
