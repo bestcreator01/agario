@@ -47,5 +47,29 @@ namespace AgarioModels
         ///     A logger object.
         /// </summary>
         public readonly ILogger logger;
+
+        /// <summary>
+        ///     The ID of the Client Player.
+        /// </summary>
+        public long PlayerID = 0;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientPlayer"></param>
+        /// <returns></returns>
+        public bool GetClientPlayer(out Player clientPlayer)
+        {
+            clientPlayer = null;
+            
+            // Check if there is a client player inside the PlayerList that we obtained from server.
+            if (PlayerList.ContainsKey(PlayerID))
+            {
+                clientPlayer = PlayerList[PlayerID];
+                return true;
+            }
+            
+            return false;
+        }
     }
 }
