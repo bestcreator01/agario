@@ -11,16 +11,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowardAgarioStepThree", "To
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{25E7413F-8E8E-41CB-BB89-C051EAF719C4}"
 	ProjectSection(SolutionItems) = preProject
+		Communications.dll = Communications.dll
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Communications", "Communications\Communications.csproj", "{276F929E-C98C-422C-81E6-3B14743D1064}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgarioModels", "AgarioModels\AgarioModels.csproj", "{ADCE446C-F40A-43D9-92F7-DB6297CC4D03}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientGUI", "ClientGUI\ClientGUI.csproj", "{A206C61B-4F65-4820-A37E-7146CCD8F616}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger", "Logger\Logger.csproj", "{7A0953C7-156E-47F6-ABA4-284F9F2E99B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "Logger\Logger.csproj", "{7A0953C7-156E-47F6-ABA4-284F9F2E99B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,10 +41,6 @@ Global
 		{93C78983-E3E4-48E2-8FD6-AB06A5CE40B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93C78983-E3E4-48E2-8FD6-AB06A5CE40B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93C78983-E3E4-48E2-8FD6-AB06A5CE40B7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{276F929E-C98C-422C-81E6-3B14743D1064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{276F929E-C98C-422C-81E6-3B14743D1064}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{276F929E-C98C-422C-81E6-3B14743D1064}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{276F929E-C98C-422C-81E6-3B14743D1064}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ADCE446C-F40A-43D9-92F7-DB6297CC4D03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ADCE446C-F40A-43D9-92F7-DB6297CC4D03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADCE446C-F40A-43D9-92F7-DB6297CC4D03}.Release|Any CPU.ActiveCfg = Release|Any CPU
