@@ -76,11 +76,11 @@ namespace ClientGUI
 
             if (world.FoodList.Count > 0)
             {
-                DrawGameObject(canvas, world.FoodList.Values);
+                DrawFoods(canvas, world.FoodList);
             }
             if (world.PlayerList.Count > 0)
             {
-                DrawGameObject(canvas, world.PlayerList.Values);
+                DrawPlayers(canvas, world.PlayerList);
             }
         }
 
@@ -98,46 +98,51 @@ namespace ClientGUI
         }
 
         /// <summary>
-        ///     A helper method to draw game objects.
+        /// TODO
         /// </summary>
-        /// <param name="canvas"> The canvas object to draw on. </param>
-        private void DrawGameObject(ICanvas canvas, IEnumerable gameObject)
+        /// <param name="canvas"></param>
+        /// <param name="foods"></param>
+        private void DrawFoods(ICanvas canvas, Dictionary<long, Food> foods)
         {
-            foreach (var obj in gameObject)
+            foreach (var food in foods.Values)
             {
                 // Assign the parameters you need for drawing objects.
                 float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
 
-                // Declare the values of x, y, and radius depending on what object it is.
-                if (obj is Food food)
-                {
-                    worldCircleX = food.X;
-                    worldCircleY = food.Y;
-                    radius = food.CircleRadius;
-                    color = food.ARGBColor;
-                    ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
+                worldCircleX = food.X;
+                worldCircleY = food.Y;
+                radius = food.CircleRadius;
+                color = food.ARGBColor;
+                ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
 
-                    // Draw on canvas
-                    canvas.FillColor = Color.FromInt(color);
-                    canvas.FillCircle(screenX, screenY, radius);
+                // Draw on canvas
+                canvas.FillColor = Color.FromInt(color);
+                canvas.FillCircle(screenX, screenY, radius);
+            }
+        }
 
-                }
-                else if (obj is Player player)
-                {
-                    worldCircleX = player.X;
-                    worldCircleY = player.Y;
-                    color = player.ARGBColor;
-                    ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenCircleX, out int screenCircleY, screenWidth, screenHeight);
-                    radius = (float)(Math.Sqrt(player.Mass / Math.PI)); // TODO - Set the circle radius of players bigger than foods.
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// <param name="players"></param>
+        private void DrawPlayers(ICanvas canvas, Dictionary<long,  Player> players)
+        {
+            foreach (var player in players.Values)
+            {
+                // Assign the parameters you need for drawing objects.
+                float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
 
-                    //// Put the X and Y coordinates of the player inside the Player object which is in PlayerList in World object.
-                    //world.PlayerList[player.ID].Location = new System.Numerics.Vector2(screenCircleX, screenCircleY);
+                worldCircleX = player.X;
+                worldCircleY = player.Y;
+                color = player.ARGBColor;
+                ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenCircleX, out int screenCircleY, screenWidth, screenHeight);
+                radius = (float)(Math.Sqrt(player.Mass / Math.PI)); // TODO - Set the circle radius of players bigger than foods.
 
-                    // Draw on canvas
-                    canvas.FillColor = Color.FromInt(color);
-                    canvas.FillCircle(screenCircleX, screenCircleY, radius);
-                    canvas.DrawString(player.Name, screenCircleX, screenCircleY, HorizontalAlignment.Center);
-                }
+                // Draw on canvas
+                canvas.FillColor = Color.FromInt(color);
+                canvas.FillCircle(screenCircleX, screenCircleY, radius);
+                canvas.DrawString(player.Name, screenCircleX, screenCircleY, HorizontalAlignment.Center);
             }
         }
 

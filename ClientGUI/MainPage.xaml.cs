@@ -143,15 +143,15 @@ namespace ClientGUI
             Point? mousePosition = null;
 
             // Gets the mouse position.
-            if (timer.Enabled)
+            if (timer.Enabled && clientPlayer != null)
             {
                 mousePosition = e.GetPosition(PlaySurface);
 
                 // Get Player's X position.
-                int mousePositionX = (int)mousePosition.Value.X;
+                int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 400;
 
                 // Get Player's Y position.
-                int mousePositionY = (int)mousePosition.Value.Y;
+                int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 400;
 
                 // Send Move request to the server.
                 string message = String.Format(Protocols.CMD_Move, mousePositionX, mousePositionY);
@@ -163,6 +163,9 @@ namespace ClientGUI
                 {
                     networking.Send(message);
                 }
+
+                // Redraw the circle.
+                PlaySurface.Invalidate();
             }
         }
 
@@ -394,7 +397,8 @@ namespace ClientGUI
                         // Update the information of existing players.
                         worldDrawable.world.PlayerList[player.ID] = player;
 
-                    } else
+                    }
+                    else
                     {
                         // Add a new player.
                         worldDrawable.world.PlayerList.Add(player.ID, player);
