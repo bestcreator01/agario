@@ -56,10 +56,14 @@ namespace ClientGUI
         public DateTime lastFrameTime;
 
         /// <summary>
-        ///     The player object representing the client player. 
-        ///     This is null if the player has not yet joined the game.
+        ///     The timer object used in this game duration.
         /// </summary>
-        private Player ClientPlayer = null;
+        private System.Timers.Timer timer = new();
+
+        /// <summary>
+        ///     The clientPlayer object.
+        /// </summary>
+        Player clientPlayer = null;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
@@ -70,14 +74,6 @@ namespace ClientGUI
             worldDrawable = new(PlaySurface);
             logger = _logger;
             logger.LogInformation("This is a ChatClient MainPage.xaml.cs constructor.");
-            try
-            {
-                _logger.LogInformation("This line is in ParseMessageHandler.");
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine($"Logger error: {ex.Message}");
-            }
         }
 
         /// <summary>
@@ -86,7 +82,7 @@ namespace ClientGUI
         private void InitializeGameLogic()
         {
             initialized = true;
-            
+
             // Assign your WorldDrawable to the PlaySurface.Drawable property.
             PlaySurface.Drawable = worldDrawable;
 
@@ -97,7 +93,7 @@ namespace ClientGUI
             lastFrameTime = DateTime.Now;
 
             // The Timer should have a Tick event that calls a method GameStep.
-            System.Timers.Timer timer = new(2_000);
+            timer = new(2_000);
             timer.Elapsed += GameStep;
             timer.Start();
         }
@@ -119,12 +115,19 @@ namespace ClientGUI
             double fps = (DateTime.Now - lastFrameTime).TotalMilliseconds / 1000;
             lastFrameTime = DateTime.Now;
 
+            // Update the position of the player.
+
             // Update the GUI labels to show the current location of the circle and its direction.
             Dispatcher.Dispatch(() =>
             {
                 FPS.Text = $"FPS: {fps:F2}";
-                CircleCenter.Text = $"Center: {worldDrawable.gameObject.X:F2}, {worldDrawable.gameObject.Y:F2}";
-                Direction.Text = $"Direction: {worldDrawable.gameObject.Location:F2}";
+
+                // Get the client player object.
+                if (worldDrawable.world.GetClientPlayer(out clientPlayer))
+                {
+                    CircleCenter.Text = $"Center: {clientPlayer.X:F2}, {clientPlayer.Y:F2}";
+                    Direction.Text = $"Direction: {clientPlayer.Location:F2}";
+                }
             });
         }
 
@@ -133,29 +136,33 @@ namespace ClientGUI
         /// <summary>
         ///     Handles when the pointer is changed.
         /// </summary>
-        /// <param name="sender"> ignored </param>
+        /// <param name="sender"> The sender object </param>
         /// <param name="e"> The pointer event that is occurring </param>
         void PointerChanged(object sender, PointerEventArgs e)
         {
-            if (ClientPlayer != null)
-            {
-                // Only positive and negative integers are acceptable
-                int floatToIntX = (int)ClientPlayer.X;
-                int floatToIntY = (int)ClientPlayer.Y;
+            Point? mousePosition = null;
 
-                string message = String.Format(Protocols.CMD_Move, floatToIntX, floatToIntY);
+            // Gets the mouse position.
+            if (timer.Enabled)
+            {
+                mousePosition = e.GetPosition(PlaySurface);
+
+                // Get Player's X position.
+                int mousePositionX = (int)mousePosition.Value.X;
+
+                // Get Player's Y position.
+                int mousePositionY = (int)mousePosition.Value.Y;
+
+                // Send Move request to the server.
+                string message = String.Format(Protocols.CMD_Move, mousePositionX, mousePositionY);
 
                 Match match = Regex.Match(message, Protocols.CMD_Move_Recognizer);
-                if (match.Success)
-                {
-                    networking.Send(networking._tcpClient, message);
-                }
+                bool matchesWithRecognizer = match.Success;
 
-                // if pointer is changed,
-                // update the location of the ClientPlayer in the playsurface
-                // some code like this - e.GetPosition( playsurface )
-                // pointer at .X and .Y
-                // ...
+                if (matchesWithRecognizer)
+                {
+                    networking.Send(message);
+                }
             }
         }
 
@@ -166,16 +173,22 @@ namespace ClientGUI
         /// <param name="e"> The tap event that is occuring </param>
         void OnTap(object sender, TappedEventArgs e)
         {
-            int floatToIntX = (int)ClientPlayer.X;
-            int floatToIntY = (int)ClientPlayer.Y;
+            //int floatToIntX = (int)ClientPlayer.X;
+            //int floatToIntY = (int)ClientPlayer.Y;
 
-            string message = String.Format(Protocols.CMD_Split, floatToIntX, floatToIntY);
+            //string message = String.Format(Protocols.CMD_Split, floatToIntX, floatToIntY);
 
-            Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
-            if (match.Success)
-            {
-                networking.Send(networking._tcpClient, message);
-            }
+            // TODO - Only split when the player object's mass is 1000 or above
+
+            // TODO - When splitting, make the player object * 2
+
+            // TODO - Make the mass / 2
+
+            //Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
+            //if (match.Success)
+            //{
+            //    networking.Send(networking._tcpClient, message);
+            //}
 
             // TODO - Put CMD_Split and CMD_Split_Recognizer here.
         }
@@ -188,7 +201,7 @@ namespace ClientGUI
         /// <param name="e"> The pan event that is occuring </param>
         void PanUpdated(object sender, PanUpdatedEventArgs e)
         {
-
+            // TODO
         }
 
         /// <summary>
@@ -263,22 +276,15 @@ namespace ClientGUI
         {
             // Backend part
             networking.Connect(EntryServer.Text, 11000);
-            networking.Send(networking._tcpClient, $"{networking.RemoteAddressPort}: Command Name {networking.ID}");
 
             // Start receiving messages from server.
             new Thread(() => networking.AwaitMessagesAsync(infinite: true)).Start();
             worldDrawable = new(PlaySurface);
             InitializeGameLogic();
 
-            //ClientPlayer = new();
-            //world = new();
-
             // Frontend (GUI) part
             Dispatcher.Dispatch(() =>
             {
-                // Update ClientPlayer name in the ClientPlayer class
-                //ClientPlayer.Name = EntryPlayerName.Text;
-
                 Warning.IsVisible = false;
                 StartScreen.IsVisible = false;
                 GameScreen.IsVisible = true;
@@ -302,7 +308,8 @@ namespace ClientGUI
             // If the name matches with the recognizer, then send the name of a ClientPlayer to a server.
             if (matchesWithRecognizer)
             {
-                channel.Send(channel._tcpClient, startGameMessage);
+                channel.Send(startGameMessage + '\n');
+                logger.LogInformation($"Message sent to server: startGameMessage");
             }
         }
 
@@ -313,7 +320,7 @@ namespace ClientGUI
         void OnDisconnect(Networking channel)
         {
             // Send a message to the server that this client is disconnected.
-            // Dead_Players?
+            //networking.Disconnect();
         }
 
         /// <summary>
@@ -336,15 +343,16 @@ namespace ClientGUI
             }
             if (message.StartsWith(Protocols.CMD_Player_Object))
             {
-                long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
+                if (worldDrawable.world.PlayerID == 0)
+                {
+                    // Obtain the player ID by deserializing the message from server.
+                    long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
 
-                // Create a random color and assign it to the ClientPlayer.
-                Random randomColor = new Random();
-                int argbcolor = randomColor.Next(int.MinValue, int.MaxValue);
-                ClientPlayer = new(playerID, 400, 400, argbcolor, 80);
+                    // Assign the value to the PlayerID in World.
+                    worldDrawable.world.PlayerID = playerID;
 
-                // Add the ClientPlayer object into the PlayerList.
-                worldDrawable.world.PlayerList.Add(playerID, ClientPlayer);
+                    worldDrawable.world.PlayerList.TryGetValue(playerID, out clientPlayer);
+                }
             }
             if (message.StartsWith(Protocols.CMD_Dead_Players))
             {
@@ -358,14 +366,14 @@ namespace ClientGUI
             }
             if (message.StartsWith(Protocols.CMD_Eaten_Food))
             {
-                List<long> eatenFoods = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Eaten_Food.Length));
+                List<long> eatenFoodsIDs = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Eaten_Food.Length));
 
                 // Remove all eaten food objects in the food list
-                foreach (var eatenFood in eatenFoods)
+                foreach (var eatenFoodID in eatenFoodsIDs)
                 {
-                    if (worldDrawable.world.FoodList.ContainsKey(eatenFood))
+                    if (worldDrawable.world.FoodList.ContainsKey(eatenFoodID))
                     {
-                        worldDrawable.world.FoodList.Remove(eatenFood);
+                        worldDrawable.world.FoodList.Remove(eatenFoodID);
                     }
                 }
             }
@@ -383,11 +391,12 @@ namespace ClientGUI
                     // If playerList contains the appropriate ClientPlayer ID, update ClientPlayer information.
                     if (worldDrawable.world.PlayerList.ContainsKey(player.ID))
                     {
-                        var updatedPlayer = worldDrawable.world.PlayerList.TryGetValue(player.ID, out Player newPlayer);
-                        newPlayer = player;
-                    }
-                    else
+                        // Update the information of existing players.
+                        worldDrawable.world.PlayerList[player.ID] = player;
+
+                    } else
                     {
+                        // Add a new player.
                         worldDrawable.world.PlayerList.Add(player.ID, player);
                     }
                 }
