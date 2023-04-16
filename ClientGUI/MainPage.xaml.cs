@@ -6,6 +6,7 @@ using AgarioModels;
 using System.Text.Json;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
+using System.Numerics;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -30,11 +31,6 @@ namespace ClientGUI
     /// </summary>
     public partial class MainPage : ContentPage
     {
-        /// <summary>
-        ///     True if the GUI is initialized.
-        /// </summary>
-        public bool initialized = false;
-
         ///// <summary>
         /////     the worlddrawable field.
         ///// </summary>
@@ -71,7 +67,11 @@ namespace ClientGUI
         public MainPage(ILogger<MainPage> _logger)
         {
             InitializeComponent();
-            worldDrawable = new(PlaySurface);
+            worldDrawable = new();
+
+            Split.Focus();
+            Split.Clicked += OnTap;
+
             logger = _logger;
             logger.LogInformation("This is a ChatClient MainPage.xaml.cs constructor.");
         }
@@ -81,8 +81,6 @@ namespace ClientGUI
         /// </summary>
         private void InitializeGameLogic()
         {
-            initialized = true;
-
             // Assign your WorldDrawable to the PlaySurface.Drawable property.
             PlaySurface.Drawable = worldDrawable;
 
@@ -127,6 +125,7 @@ namespace ClientGUI
                 {
                     CircleCenter.Text = $"Center: {clientPlayer.X:F2}, {clientPlayer.Y:F2}";
                     Direction.Text = $"Direction: {clientPlayer.Location:F2}";
+                    FoodCount.Text = $"Amount of Food: {worldDrawable.world.FoodList.Count()}";
                 }
             });
         }
@@ -148,10 +147,10 @@ namespace ClientGUI
                 mousePosition = e.GetPosition(PlaySurface);
 
                 // Get Player's X position.
-                int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 300;
+                int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 400;
 
                 // Get Player's Y position.
-                int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 300;
+                int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 400;
 
                 // Send Move request to the server.
                 string message = String.Format(Protocols.CMD_Move, mousePositionX, mousePositionY);
@@ -169,6 +168,7 @@ namespace ClientGUI
             }
         }
 
+
         /// <summary>
         ///     Handles when the spacebar is tapped.
         /// </summary>
@@ -176,6 +176,21 @@ namespace ClientGUI
         /// <param name="e"> The tap event that is occuring </param>
         void OnTap(object sender, TappedEventArgs e)
         {
+            Restart.IsVisible = true;
+            Restart.Text = "it's working!";
+            //if (e.Buttons.)
+            //if (clientPlayer.Mass >= 1000f)
+            //{
+            //float newRadius = clientPlayer.CircleRadius / 2;
+            //Vector2 newPosition = new Vector2(clientPlayer.X + newRadius, clientPlayer.Y);
+            //Player newSplitPlayer = new Player(clientPlayer.ID, newPosition.X, newPosition.Y, clientPlayer.ARGBColor, clientPlayer.Mass / 2);
+
+            //worldDrawable.world.PlayerList.Add(clientPlayer.ID, newSplitPlayer);
+
+            // Send split message
+            //string message = string.Format(Protocols.CMD_Split, clientPlayer.X + 100, clientPlayer.Y + 100);
+            //networking.Send(message);
+            //}
             //int floatToIntX = (int)ClientPlayer.X;
             //int floatToIntY = (int)ClientPlayer.Y;
 
@@ -282,7 +297,7 @@ namespace ClientGUI
 
             // Start receiving messages from server.
             new Thread(() => networking.AwaitMessagesAsync(infinite: true)).Start();
-            worldDrawable = new(PlaySurface);
+            worldDrawable = new();
             InitializeGameLogic();
 
             // Frontend (GUI) part
@@ -291,6 +306,23 @@ namespace ClientGUI
                 Warning.IsVisible = false;
                 StartScreen.IsVisible = false;
                 GameScreen.IsVisible = true;
+            });
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void RestartButtonClicked(object sender, EventArgs e)
+        {
+            // Send the start message to server to restart the game.
+            OnConnect(networking);
+
+            Dispatcher.Dispatch(() =>
+            {
+                Dead.IsVisible = false;
+                Restart.IsVisible = false;
             });
         }
 
@@ -337,11 +369,14 @@ namespace ClientGUI
             {
                 List<Food> foodList = JsonSerializer.Deserialize<List<Food>>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
 
-                // Add the deserialized elements into the FoodList.
-                foreach (var food in foodList)
+                lock (worldDrawable.world.FoodList)
                 {
-                    //world.FoodList.Add(food.ID, food);
-                    worldDrawable.world.FoodList.Add(food.ID, food);
+                    // Add the deserialized elements into the FoodList.
+                    foreach (var food in foodList)
+                    {
+                        //world.FoodList.Add(food.ID, food);
+                        worldDrawable.world.FoodList.Add(food.ID, food);
+                    }
                 }
             }
             if (message.StartsWith(Protocols.CMD_Player_Object))
@@ -361,23 +396,30 @@ namespace ClientGUI
             {
                 List<int> deadPlayers = JsonSerializer.Deserialize<List<int>>(message.Substring(Protocols.CMD_Dead_Players.Length));
 
-                // Iterate over the ID of each dead ClientPlayer in deadPlayers.
-                foreach (int deadPlayerID in deadPlayers)
+                lock (worldDrawable.world.PlayerList)
                 {
-                    worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                    // Iterate over the ID of each dead ClientPlayer in deadPlayers.
+                    foreach (int deadPlayerID in deadPlayers)
+                    {
+                        worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                    }
                 }
             }
             if (message.StartsWith(Protocols.CMD_Eaten_Food))
             {
                 List<long> eatenFoodsIDs = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Eaten_Food.Length));
 
-                // Remove all eaten food objects in the food list
-                foreach (var eatenFoodID in eatenFoodsIDs)
+                lock (worldDrawable.world.FoodList)
                 {
-                    if (worldDrawable.world.FoodList.ContainsKey(eatenFoodID))
+                    // Remove all eaten food objects in the food list
+                    foreach (var eatenFoodID in eatenFoodsIDs)
                     {
-                        worldDrawable.world.FoodList.Remove(eatenFoodID);
+                        if (worldDrawable.world.FoodList.ContainsKey(eatenFoodID))
+                        {
+                            worldDrawable.world.FoodList.Remove(eatenFoodID);
+                        }
                     }
+
                 }
             }
             if (message.StartsWith(Protocols.CMD_HeartBeat))
@@ -388,24 +430,26 @@ namespace ClientGUI
             {
                 List<Player> updatePlayers = JsonSerializer.Deserialize<List<Player>>(message.Substring(Protocols.CMD_Update_Players.Length));
 
-                // Iterate through the updated list of players.
-                foreach (var player in updatePlayers)
+                lock (worldDrawable.world.PlayerList)
                 {
-                    // If playerList contains the appropriate ClientPlayer ID, update ClientPlayer information.
-                    if (worldDrawable.world.PlayerList.ContainsKey(player.ID))
+                    // Iterate through the updated list of players.
+                    foreach (var player in updatePlayers)
                     {
-                        // Update the information of existing players.
-                        worldDrawable.world.PlayerList[player.ID] = player;
+                        // If playerList contains the appropriate ClientPlayer ID, update ClientPlayer information.
+                        if (worldDrawable.world.PlayerList.ContainsKey(player.ID))
+                        {
+                            // Update the information of existing players.
+                            worldDrawable.world.PlayerList[player.ID] = player;
 
-                    }
-                    else
-                    {
-                        // Add a new player.
-                        worldDrawable.world.PlayerList.Add(player.ID, player);
+                        }
+                        else
+                        {
+                            // Add a new player.
+                            worldDrawable.world.PlayerList.Add(player.ID, player);
+                        }
                     }
                 }
             }
         }
-
     }
 }

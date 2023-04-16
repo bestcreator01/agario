@@ -35,11 +35,6 @@ namespace ClientGUI
         private readonly float Height = 800;
 
         /// <summary>
-        ///     World that we have a reference to.
-        /// </summary>
-        private readonly GraphicsView gv;
-
-        /// <summary>
         ///     The WorldModel to be drawn.
         /// </summary>
         public World world;
@@ -58,11 +53,10 @@ namespace ClientGUI
         /// <summary>
         ///     Constructor of WorldDrawable
         /// </summary>
-        public WorldDrawable(GraphicsView gv)
+        public WorldDrawable()
         {
             world = new();
             gameObject = new();
-            this.gv = gv;
         }
 
         /// <summary>
@@ -104,10 +98,9 @@ namespace ClientGUI
         /// <param name="foods"></param>
         private void DrawFoods(ICanvas canvas, Dictionary<long, Food> foods)
         {
-            var copyList = foods.Values;
-            lock (copyList)
+            lock (world.FoodList)
             {
-                foreach (var food in copyList)
+                foreach (var food in foods.Values)
                 {
                     // Assign the parameters you need for drawing objects.
                     float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
@@ -130,12 +123,11 @@ namespace ClientGUI
         /// </summary>
         /// <param name="canvas"></param>
         /// <param name="players"></param>
-        private void DrawPlayers(ICanvas canvas, Dictionary<long,  Player> players)
+        private void DrawPlayers(ICanvas canvas, Dictionary<long, Player> players)
         {
-            var copyList = players.Values;
-            lock (copyList)
+            lock (world.PlayerList)
             {
-                foreach (var player in copyList)
+                foreach (var player in players.Values)
                 {
                     // Assign the parameters you need for drawing objects.
                     float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;

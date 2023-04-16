@@ -26,8 +26,8 @@
             x:Name="StartScreen"
             IsVisible="true"
             BackgroundColor="White"
-            HorizontalOptions="CenterAndExpand"
-            VerticalOptions="CenterAndExpand">
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
             <!-- Welcome screen -->
             <VerticalStackLayout>
                 <VerticalStackLayout 
@@ -122,8 +122,10 @@
                         HorizontalOptions="Start"
                         VerticalOptions="Center">
                         <GraphicsView.GestureRecognizers>
-                            <PointerGestureRecognizer PointerMoved="PointerChanged"/> <!--mouse-->
-                            <TapGestureRecognizer Tapped="OnTap"/> <!--spacebar-->
+                            <PointerGestureRecognizer PointerMoved="PointerChanged"/>
+                            <!--mouse-->
+                            <TapGestureRecognizer Tapped="OnTap"/>
+                            <!--spacebar-->
                             <PanGestureRecognizer PanUpdated="PanUpdated"/>
                             <!--zooming in-->
                         </GraphicsView.GestureRecognizers>
@@ -133,7 +135,7 @@
                     <VerticalStackLayout
                         Spacing="20"
                         HorizontalOptions="End"
-                        VerticalOptions="Start">
+                        VerticalOptions="Center">
                         <Label
                             x:Name="FPS"
                             Text="FPS: "
@@ -148,9 +150,41 @@
 
                         <Label
                             x:Name="Direction"
-                            Text ="Direction: "
+                            Text="Direction: "
                             TextColor="Black"
                             FontSize="Default"/>
+
+                        <Label
+                            x:Name="FoodCount"
+                            Text="Amount of Food: "
+                            TextColor="Black"
+                            FontSize="Default"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+                        <Label
+                            x:Name="Dead"
+                            Text=""
+                            TextColor="Red"
+                            FontSize="Subtitle"
+                            FontAttributes="Bold"/>
+
+                        <Button
+                            x:Name="Restart"
+                            Text="Restart the game?"
+                            TextColor="Black"
+                            BackgroundColor="GhostWhite"
+                            IsVisible="false"
+                            Clicked="RestartButtonClicked"/>
+
+                        <Button
+                            x:Name="Split"
+                            Text="Split!"
+                            TextColor="Black"
+                            BackgroundColor="GhostWhite"
+                            IsVisible="true"/>
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
