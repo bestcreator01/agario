@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AgarioModels\AgarioModels.csproj" />
-    <ProjectReference Include="..\Communications\Communications.csproj" />
   </ItemGroup>
 
 </Project>
