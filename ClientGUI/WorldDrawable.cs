@@ -104,20 +104,24 @@ namespace ClientGUI
         /// <param name="foods"></param>
         private void DrawFoods(ICanvas canvas, Dictionary<long, Food> foods)
         {
-            foreach (var food in foods.Values)
+            var copyList = foods.Values;
+            lock (copyList)
             {
-                // Assign the parameters you need for drawing objects.
-                float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
+                foreach (var food in copyList)
+                {
+                    // Assign the parameters you need for drawing objects.
+                    float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
 
-                worldCircleX = food.X;
-                worldCircleY = food.Y;
-                radius = food.CircleRadius;
-                color = food.ARGBColor;
-                ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
+                    worldCircleX = food.X;
+                    worldCircleY = food.Y;
+                    radius = food.CircleRadius;
+                    color = food.ARGBColor;
+                    ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenX, out int screenY, screenWidth, screenHeight);
 
-                // Draw on canvas
-                canvas.FillColor = Color.FromInt(color);
-                canvas.FillCircle(screenX, screenY, radius);
+                    // Draw on canvas
+                    canvas.FillColor = Color.FromInt(color);
+                    canvas.FillCircle(screenX, screenY, radius);
+                }
             }
         }
 
@@ -128,21 +132,25 @@ namespace ClientGUI
         /// <param name="players"></param>
         private void DrawPlayers(ICanvas canvas, Dictionary<long,  Player> players)
         {
-            foreach (var player in players.Values)
+            var copyList = players.Values;
+            lock (copyList)
             {
-                // Assign the parameters you need for drawing objects.
-                float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
+                foreach (var player in copyList)
+                {
+                    // Assign the parameters you need for drawing objects.
+                    float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
 
-                worldCircleX = player.X;
-                worldCircleY = player.Y;
-                color = player.ARGBColor;
-                ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenCircleX, out int screenCircleY, screenWidth, screenHeight);
-                radius = (float)(Math.Sqrt(player.Mass / Math.PI)); // TODO - Set the circle radius of players bigger than foods.
+                    worldCircleX = player.X;
+                    worldCircleY = player.Y;
+                    color = player.ARGBColor;
+                    ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, world.WindowWidth, world.WindowHeight, out int screenCircleX, out int screenCircleY, screenWidth, screenHeight);
+                    radius = (float)(Math.Sqrt(player.Mass / Math.PI)); // TODO - Set the circle radius of players bigger than foods.
 
-                // Draw on canvas
-                canvas.FillColor = Color.FromInt(color);
-                canvas.FillCircle(screenCircleX, screenCircleY, radius);
-                canvas.DrawString(player.Name, screenCircleX, screenCircleY, HorizontalAlignment.Center);
+                    // Draw on canvas
+                    canvas.FillColor = Color.FromInt(color);
+                    canvas.FillCircle(screenCircleX, screenCircleY, radius);
+                    canvas.DrawString(player.Name, screenCircleX, screenCircleY, HorizontalAlignment.Center);
+                }
             }
         }
 

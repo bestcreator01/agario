@@ -148,10 +148,10 @@ namespace ClientGUI
                 mousePosition = e.GetPosition(PlaySurface);
 
                 // Get Player's X position.
-                int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 400;
+                int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 300;
 
                 // Get Player's Y position.
-                int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 400;
+                int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 300;
 
                 // Send Move request to the server.
                 string message = String.Format(Protocols.CMD_Move, mousePositionX, mousePositionY);
