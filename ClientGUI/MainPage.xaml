@@ -136,7 +136,7 @@
                     <VerticalStackLayout
                         Spacing="20"
                         HorizontalOptions="Center"
-                        VerticalOptions="Center">
+                        VerticalOptions="Start">
 
                         <Label
                             x:Name="InfoTitle"
