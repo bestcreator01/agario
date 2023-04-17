@@ -11,6 +11,12 @@ in Academic Coursework.
 
 # Comments to Evaluators:
 
+	Important note:
+	1) The Communications.dll file is in the Solutions Folder.
+	2) Our splitting works when you left click the mouse instead of pressing the space bar.
+	3) When player becomes laggy and somehow stops at some point (it is not technically being stopped)
+	try left-clicking the mouse outside the screen, on the white background.
+
 	Important note: Our splitting works when you left click the mouse. It does not work with pressing the space bar.
 	When player becomes laggy and somehow stops at some point(it is not technically being stopped) try left-clicking the mouse
 	outside the screen, on the white background.
