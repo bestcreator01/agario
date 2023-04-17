@@ -26,12 +26,12 @@ namespace AgarioModels
         /// <summary>
         ///     The width of the window in pixels.
         /// </summary>
-        public readonly float WindowWidth = 5000;
+        public readonly float WorldWidth = 5000;
 
         /// <summary>
         ///     The height of the window in pixels.
         /// </summary>
-        public readonly float WindowHeight = 5000;
+        public readonly float WorldHeight = 5000;
 
         /// <summary>
         ///     A list of players. Contains ID and player.
