@@ -154,6 +154,12 @@
                             TextColor="Black"
                             FontSize="Default"/>
 
+                        <Label 
+                            x:Name="PlayerCount"
+                            Text="Amount of Player: "
+                            TextColor="Black"
+                            FontSize="Default"/>
+
                         <Label
                             x:Name="FoodCount"
                             Text="Amount of Food: "
@@ -184,7 +190,8 @@
                             Text="Split!"
                             TextColor="Black"
                             BackgroundColor="GhostWhite"
-                            IsVisible="true"/>
+                            Clicked="SplitButtonClicked"
+                            IsVisible="false"/>
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
             </VerticalStackLayout>

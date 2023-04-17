@@ -1,4 +1,5 @@
 ﻿using AgarioModels;
+using Microsoft.Extensions.Logging;
 using System.Collections;
 
 /// <summary>
@@ -27,12 +28,12 @@ namespace ClientGUI
         /// <summary>
         ///     The screen width - will be computed later.
         /// </summary>
-        private readonly float Width = 800;
+        public readonly float Width = 800;
 
         /// <summary>
         ///     The screen height - will be computed later.
         /// </summary>
-        private readonly float Height = 800;
+        public readonly float Height = 800;
 
         /// <summary>
         ///     The WorldModel to be drawn.
@@ -43,12 +44,12 @@ namespace ClientGUI
         /// <summary>
         ///     The screen width.
         /// </summary>
-        private int screenWidth;
+        public int screenWidth;
 
         /// <summary>
         ///     The screen height.
         /// </summary>
-        private int screenHeight;
+        public int screenHeight;
 
         /// <summary>
         ///     Constructor of WorldDrawable
@@ -184,7 +185,7 @@ namespace ClientGUI
         /// <param name="screenCircleY">The Y coordinate of the food object in screen coordinates.</param>
         /// <param name="screenWidth">The width of the screen in pixels.</param>
         /// <param name="screenHeight">The height of the screen in pixels.</param>        
-        private void ConvertFromWorldToScreenFoodAndPlayer(
+        public void ConvertFromWorldToScreenFoodAndPlayer(
             in float worldCircleX, in float worldCircleY, in float worldWidth, in float worldHeight,
             out int screenCircleX, out int screenCircleY, in int screenWidth, in int screenHeight)
         {

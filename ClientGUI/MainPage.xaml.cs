@@ -4,9 +4,7 @@ using Communications;
 using Microsoft.Extensions.Logging;
 using AgarioModels;
 using System.Text.Json;
-using System.Collections.Immutable;
 using System.Text.RegularExpressions;
-using System.Numerics;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -69,11 +67,32 @@ namespace ClientGUI
             InitializeComponent();
             worldDrawable = new();
 
-            Split.Focus();
-            Split.Clicked += OnTap;
-
             logger = _logger;
             logger.LogInformation("This is a ChatClient MainPage.xaml.cs constructor.");
+        }
+
+        /// <summary>
+        ///     Activates when the spacebar is tapped.
+        /// </summary>
+        /// <param name="sender"> ignored </param>
+        /// <param name="e"> ignored </param>
+        void SplitButtonClicked(object sender, EventArgs e)
+        {
+            float worldCircleX = clientPlayer.X;
+            float worldCircleY = clientPlayer.Y;
+
+            // Convert the coordinates from world to screen.
+            worldDrawable.ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, worldDrawable.world.WindowWidth, worldDrawable.world.WindowHeight, out int screenCircleX, out int screenCircleY, worldDrawable.screenWidth, worldDrawable.screenHeight);
+            string message = string.Format(Protocols.CMD_Split, screenCircleX + 100, screenCircleY + 100);
+
+            Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
+            bool matchesWithRecognizer = match.Success;
+
+            if (matchesWithRecognizer)
+            {
+                networking.Send(message);
+                logger.LogInformation($"Split button was clicked. Message sent to server: {message}");
+            }
         }
 
         /// <summary>
@@ -84,16 +103,13 @@ namespace ClientGUI
             // Assign your WorldDrawable to the PlaySurface.Drawable property.
             PlaySurface.Drawable = worldDrawable;
 
-            //// Resize the widget.
-            //PlaySurface.Width = 800;
-            //Window.Height = 800;
-
             lastFrameTime = DateTime.Now;
 
             // The Timer should have a Tick event that calls a method GameStep.
             timer = new(2_000);
             timer.Elapsed += GameStep;
             timer.Start();
+            logger.LogInformation($"Game is initialized.");
         }
 
         /// <summary>
@@ -118,16 +134,24 @@ namespace ClientGUI
             // Update the GUI labels to show the current location of the circle and its direction.
             Dispatcher.Dispatch(() =>
             {
+                // This button has to be focused since we want the player to be splitted when 
+                // a spacebar is tapped.
+                Split.Focus();
+
                 FPS.Text = $"FPS: {fps:F2}";
+
+                PlayerCount.Text = $"Amount of Player: {worldDrawable.world.PlayerList.Count()}";
+                FoodCount.Text = $"Amount of Food: {worldDrawable.world.FoodList.Count()}";
 
                 // Get the client player object.
                 if (worldDrawable.world.GetClientPlayer(out clientPlayer))
                 {
                     CircleCenter.Text = $"Center: {clientPlayer.X:F2}, {clientPlayer.Y:F2}";
                     Direction.Text = $"Direction: {clientPlayer.Location:F2}";
-                    FoodCount.Text = $"Amount of Food: {worldDrawable.world.FoodList.Count()}";
                 }
             });
+
+            logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
         }
 
         /* Manage the GUI controls. */
@@ -147,10 +171,12 @@ namespace ClientGUI
                 mousePosition = e.GetPosition(PlaySurface);
 
                 // Get Player's X position.
-                int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 400;
+                //int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 400;
+                int mousePositionX = (int)(mousePosition.Value.X * (worldDrawable.world.WindowWidth / worldDrawable.Width));
 
                 // Get Player's Y position.
-                int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 400;
+                //int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 400;
+                int mousePositionY = (int)(mousePosition.Value.Y * (worldDrawable.world.WindowHeight / worldDrawable.Height));
 
                 // Send Move request to the server.
                 string message = String.Format(Protocols.CMD_Move, mousePositionX, mousePositionY);
@@ -161,6 +187,7 @@ namespace ClientGUI
                 if (matchesWithRecognizer)
                 {
                     networking.Send(message);
+                    logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
                 }
 
                 // Redraw the circle.
@@ -168,16 +195,13 @@ namespace ClientGUI
             }
         }
 
-
         /// <summary>
-        ///     Handles when the spacebar is tapped.
+        ///     Handles when the left mouse is tapped.
         /// </summary>
         /// <param name="sender"> ignored </param>
-        /// <param name="e"> The tap event that is occuring </param>
-        void OnTap(object sender, TappedEventArgs e)
+        /// <param name="e"> ignored </param>
+        void OnTap(object sender, EventArgs e)
         {
-            Restart.IsVisible = true;
-            Restart.Text = "it's working!";
             //if (e.Buttons.)
             //if (clientPlayer.Mass >= 1000f)
             //{
@@ -236,6 +260,7 @@ namespace ClientGUI
                     Warning.IsVisible = true;
                     Warning.Text = "Please Type Your Name!";
                 });
+                logger.LogInformation($"The client failed to type their name.");
             }
             else
             {
@@ -249,13 +274,17 @@ namespace ClientGUI
 
                         // Put the user name in the networking object.
                         networking.ID = EntryPlayerName.Text;
+                        worldDrawable.world.PlayerName = EntryPlayerName.Text;
 
                         // Try connecting to server.
                         ConnectToServer();
+
+                        logger.LogInformation($"The client successfully connected to server.");
                     }
                     catch (Exception ex)
                     {
                         ShowWarningMessage(ex);
+                        logger.LogError($"There was an error while connecting: {ex.Message}");
                     }
                 }
                 else
@@ -264,10 +293,12 @@ namespace ClientGUI
                     try
                     {
                         ConnectToServer();
+                        logger.LogInformation($"Trying to reconnect to the server.");
                     }
                     catch (Exception ex)
                     {
                         ShowWarningMessage(ex);
+                        logger.LogError($"There was an error while connecting: {ex.Message}");
                     }
                 }
             }
@@ -310,20 +341,21 @@ namespace ClientGUI
         }
 
         /// <summary>
-        /// TODO
+        ///     Activates when the restart button is clicked.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> ignored </param>
+        /// <param name="e"> ignored </param>
         void RestartButtonClicked(object sender, EventArgs e)
         {
-            // Send the start message to server to restart the game.
-            OnConnect(networking);
+            SendStartMessage(networking); // ?
 
             Dispatcher.Dispatch(() =>
             {
                 Dead.IsVisible = false;
                 Restart.IsVisible = false;
             });
+
+            logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
         }
 
         /// <summary>
@@ -332,9 +364,17 @@ namespace ClientGUI
         /// <param name="channel"> The networking channel where the connection occured. </param>
         void OnConnect(Networking channel)
         {
+            SendStartMessage(channel);
+        }
+
+        /// <summary>
+        ///     Sends a start message to the server whenever the game starts.
+        /// </summary>
+        /// <param name="channel"> the networking object </param>
+        private void SendStartMessage(Networking channel)
+        {
             // Combine the ClientPlayer name with the CMD message.
-            string playerName = EntryPlayerName.Text;
-            string startGameMessage = string.Format(Protocols.CMD_Start_Game, playerName);
+            string startGameMessage = string.Format(Protocols.CMD_Start_Game, worldDrawable.world.PlayerName);
 
             // Check if it matches with Recognizer.
             Match match = Regex.Match(startGameMessage, Protocols.CMD_Start_Recognizer);
@@ -344,7 +384,7 @@ namespace ClientGUI
             if (matchesWithRecognizer)
             {
                 channel.Send(startGameMessage + '\n');
-                logger.LogInformation($"Message sent to server: startGameMessage");
+                logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
             }
         }
 
@@ -356,6 +396,7 @@ namespace ClientGUI
         {
             // Send a message to the server that this client is disconnected.
             //networking.Disconnect();
+            logger.LogInformation($"The client just disconnected.");
         }
 
         /// <summary>
@@ -365,6 +406,8 @@ namespace ClientGUI
         /// <param name="message"> The message that was received. </param>
         void OnMessage(Networking channel, string message)
         {
+            logger.LogInformation($"Just received a message from the server: {message}");
+
             if (message.StartsWith(Protocols.CMD_Food))
             {
                 List<Food> foodList = JsonSerializer.Deserialize<List<Food>>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
@@ -389,19 +432,33 @@ namespace ClientGUI
                     // Assign the value to the PlayerID in World.
                     worldDrawable.world.PlayerID = playerID;
 
-                    worldDrawable.world.PlayerList.TryGetValue(playerID, out clientPlayer);
+                    // Get the client player ob
+                    worldDrawable.world.GetClientPlayer(out clientPlayer);
                 }
             }
             if (message.StartsWith(Protocols.CMD_Dead_Players))
             {
-                List<int> deadPlayers = JsonSerializer.Deserialize<List<int>>(message.Substring(Protocols.CMD_Dead_Players.Length));
+                List<long> deadPlayersIDs = JsonSerializer.Deserialize<List<long>>(message.Substring(Protocols.CMD_Dead_Players.Length));
 
                 lock (worldDrawable.world.PlayerList)
                 {
                     // Iterate over the ID of each dead ClientPlayer in deadPlayers.
-                    foreach (int deadPlayerID in deadPlayers)
+                    foreach (long deadPlayerID in deadPlayersIDs)
                     {
-                        worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                        // If the player ID and one of the dead player's IDs are the same, show the restart button.
+                        if (worldDrawable.world.PlayerID == deadPlayerID)
+                        {
+                            Dispatcher.Dispatch(() =>
+                            {
+                                Restart.IsVisible = true;
+                            });
+                        }
+
+                        // Remove the IDs of dead players.
+                        if (worldDrawable.world.PlayerList.ContainsKey(deadPlayerID))
+                        {
+                            worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                        }
                     }
                 }
             }
@@ -419,7 +476,6 @@ namespace ClientGUI
                             worldDrawable.world.FoodList.Remove(eatenFoodID);
                         }
                     }
-
                 }
             }
             if (message.StartsWith(Protocols.CMD_HeartBeat))

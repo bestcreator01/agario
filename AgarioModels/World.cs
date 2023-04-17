@@ -56,6 +56,11 @@ namespace AgarioModels
         /// <summary>
         /// 
         /// </summary>
+        public string PlayerName = "";
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="clientPlayer"></param>
         /// <returns></returns>
         public bool GetClientPlayer(out Player clientPlayer)
