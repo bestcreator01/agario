@@ -5,11 +5,13 @@ using Microsoft.Extensions.Logging;
 using AgarioModels;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
+using Windows.Media.Capture;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
 /// Partner:    Seoin Kim and Gloria Shin
-/// Date:       14-Apr-2023
+/// Date:       17-Apr-2023
 /// Course:     CS 3500, University of Utah, School of Computing
 /// Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not 
 /// be copied for use in Academic Courswork.
@@ -60,6 +62,11 @@ namespace ClientGUI
         Player clientPlayer = null;
 
         /// <summary>
+        ///     A field where it stores the value of heartbeat.
+        /// </summary>
+        private int heartbeat = 0;
+
+        /// <summary>
         ///     The MainPage of ClientGUI.
         /// </summary>
         public MainPage(ILogger<MainPage> _logger)
@@ -69,30 +76,6 @@ namespace ClientGUI
 
             worldDrawable = new(logger);
             logger.LogInformation("This is a ClientGUI MainPage.xaml.cs constructor.");
-        }
-
-        /// <summary>
-        ///     Activates when the spacebar is tapped.
-        /// </summary>
-        /// <param name="sender"> ignored </param>
-        /// <param name="e"> ignored </param>
-        void SplitButtonClicked(object sender, EventArgs e)
-        {
-            float worldCircleX = clientPlayer.X;
-            float worldCircleY = clientPlayer.Y;
-
-            // Convert the coordinates from world to screen.
-            worldDrawable.ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, worldDrawable.world.WindowWidth, worldDrawable.world.WindowHeight, out int screenCircleX, out int screenCircleY, worldDrawable.screenWidth, worldDrawable.screenHeight);
-            string message = string.Format(Protocols.CMD_Split, screenCircleX + 100, screenCircleY + 100);
-
-            Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
-            bool matchesWithRecognizer = match.Success;
-
-            if (matchesWithRecognizer)
-            {
-                networking.Send(message);
-                logger.LogInformation($"Split button was clicked. Message sent to server: {message}");
-            }
         }
 
         /// <summary>
@@ -132,11 +115,8 @@ namespace ClientGUI
             // Update the GUI labels to show the current location of the circle and its direction.
             Dispatcher.Dispatch(() =>
             {
-                // This button has to be focused since we want the player to be splitted when 
-                // a spacebar is tapped.
-                Split.Focus();
-
                 FPS.Text = $"FPS: {fps:F2}";
+                Heartbeat.Text = $"Heartbeat: {heartbeat}";
 
                 PlayerCount.Text = $"Amount of Player: {worldDrawable.world.PlayerList.Count()}";
                 FoodCount.Text = $"Amount of Food: {worldDrawable.world.FoodList.Count()}";
@@ -146,6 +126,7 @@ namespace ClientGUI
                 {
                     CircleCenter.Text = $"Center: {clientPlayer.X:F2}, {clientPlayer.Y:F2}";
                     Direction.Text = $"Direction: {clientPlayer.Location:F2}";
+                    Mass.Text = $"Mass: {clientPlayer.Mass:F2}";
                 }
             });
 
@@ -200,37 +181,24 @@ namespace ClientGUI
         /// <param name="e"> ignored </param>
         void OnTap(object sender, EventArgs e)
         {
-            //if (e.Buttons.)
-            //if (clientPlayer.Mass >= 1000f)
-            //{
-            //float newRadius = clientPlayer.CircleRadius / 2;
-            //Vector2 newPosition = new Vector2(clientPlayer.X + newRadius, clientPlayer.Y);
-            //Player newSplitPlayer = new Player(clientPlayer.ID, newPosition.X, newPosition.Y, clientPlayer.ARGBColor, clientPlayer.Mass / 2);
-
-            //worldDrawable.world.PlayerList.Add(clientPlayer.ID, newSplitPlayer);
-
+            // TODO - write this functionality in README.
+            
             // Send split message
-            //string message = string.Format(Protocols.CMD_Split, clientPlayer.X + 100, clientPlayer.Y + 100);
-            //networking.Send(message);
-            //}
-            //int floatToIntX = (int)ClientPlayer.X;
-            //int floatToIntY = (int)ClientPlayer.Y;
+            float worldCircleX = clientPlayer.X;
+            float worldCircleY = clientPlayer.Y;
 
-            //string message = String.Format(Protocols.CMD_Split, floatToIntX, floatToIntY);
+            // Convert the coordinates from world to screen.
+            worldDrawable.ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, worldDrawable.world.WindowWidth, worldDrawable.world.WindowHeight, out int screenCircleX, out int screenCircleY, worldDrawable.screenWidth, worldDrawable.screenHeight);
+            string message = string.Format(Protocols.CMD_Split, screenCircleX + 100, screenCircleY + 100);
 
-            // TODO - Only split when the player object's mass is 1000 or above
+            Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
+            bool matchesWithRecognizer = match.Success;
 
-            // TODO - When splitting, make the player object * 2
-
-            // TODO - Make the mass / 2
-
-            //Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
-            //if (match.Success)
-            //{
-            //    networking.Send(networking._tcpClient, message);
-            //}
-
-            // TODO - Put CMD_Split and CMD_Split_Recognizer here.
+            if (matchesWithRecognizer)
+            {
+                networking.Send(message);
+                logger.LogInformation($"Split button was clicked. Message sent to server: {message}");
+            }
         }
 
         /// <summary>
@@ -272,7 +240,7 @@ namespace ClientGUI
 
                         // Put the user name in the networking object.
                         networking.ID = EntryPlayerName.Text;
-                        worldDrawable.world.PlayerName = EntryPlayerName.Text;
+                        //worldDrawable.world.PlayerName = EntryPlayerName.Text;
 
                         // Try connecting to server.
                         ConnectToServer();
@@ -345,7 +313,13 @@ namespace ClientGUI
         /// <param name="e"> ignored </param>
         void RestartButtonClicked(object sender, EventArgs e)
         {
-            SendStartMessage(networking); // ?
+            //worldDrawable.world.PlayerName = EntryPlayerName.Text;
+            clientPlayer = null;
+
+            networking.Connect(EntryServer.Text, 11000);
+
+            // Start receiving messages from server.
+            new Thread(() => networking.AwaitMessagesAsync(infinite: true)).Start();
 
             Dispatcher.Dispatch(() =>
             {
@@ -372,7 +346,7 @@ namespace ClientGUI
         private void SendStartMessage(Networking channel)
         {
             // Combine the ClientPlayer name with the CMD message.
-            string startGameMessage = string.Format(Protocols.CMD_Start_Game, worldDrawable.world.PlayerName);
+            string startGameMessage = string.Format(Protocols.CMD_Start_Game, EntryPlayerName.Text);
 
             // Check if it matches with Recognizer.
             Match match = Regex.Match(startGameMessage, Protocols.CMD_Start_Recognizer);
@@ -414,24 +388,29 @@ namespace ClientGUI
                     // Add the deserialized elements into the FoodList.
                     foreach (var food in foodList)
                     {
-                        //world.FoodList.Add(food.ID, food);
-                        worldDrawable.world.FoodList.Add(food.ID, food);
+                        if (worldDrawable.world.FoodList.ContainsKey(food.ID))
+                        {
+                            worldDrawable.world.FoodList[food.ID] = food;
+                        }
+                        else
+                        {
+                            worldDrawable.world.FoodList.Add(food.ID, food);
+                        }
                     }
                 }
             }
             if (message.StartsWith(Protocols.CMD_Player_Object))
             {
-                if (worldDrawable.world.PlayerID == 0)
-                {
-                    // Obtain the player ID by deserializing the message from server.
-                    long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
+                // Obtain the player ID by deserializing the message from server.
+                long playerID = JsonSerializer.Deserialize<long>(message.Substring(Protocols.CMD_Player_Object.Length));
 
-                    // Assign the value to the PlayerID in World.
-                    worldDrawable.world.PlayerID = playerID;
+                // Assign the value to the PlayerID in World.
+                worldDrawable.world.PlayerID = playerID;
 
-                    // Get the client player ob
-                    worldDrawable.world.GetClientPlayer(out clientPlayer);
-                }
+                // Get the client player object.
+                worldDrawable.world.GetClientPlayer(out clientPlayer);
+
+                clientPlayer.Name = EntryPlayerName.Text;
             }
             if (message.StartsWith(Protocols.CMD_Dead_Players))
             {
@@ -455,6 +434,7 @@ namespace ClientGUI
                         if (worldDrawable.world.PlayerList.ContainsKey(deadPlayerID))
                         {
                             worldDrawable.world.PlayerList.Remove(deadPlayerID);
+                            networking.Disconnect();
                         }
                     }
                 }
@@ -477,7 +457,7 @@ namespace ClientGUI
             }
             if (message.StartsWith(Protocols.CMD_HeartBeat))
             {
-                int heartBeat = JsonSerializer.Deserialize<int>(message.Substring(Protocols.CMD_HeartBeat.Length));
+                heartbeat = JsonSerializer.Deserialize<int>(message.Substring(Protocols.CMD_HeartBeat.Length));
             }
             if (message.StartsWith(Protocols.CMD_Update_Players))
             {
@@ -493,7 +473,6 @@ namespace ClientGUI
                         {
                             // Update the information of existing players.
                             worldDrawable.world.PlayerList[player.ID] = player;
-
                         }
                         else
                         {

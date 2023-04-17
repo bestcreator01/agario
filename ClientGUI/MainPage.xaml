@@ -6,7 +6,7 @@
     <!--
         Author:     Seoin Kim and Gloria Shin
         Partner:    Seoin Kim and Gloria Shin
-        Date:       14-Apr-2023
+        Date:       17-Apr-2023
         Course:     CS 3500, University of Utah, School of Computing
         Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not 
         be copied for use in Academic Courswork.
@@ -143,6 +143,12 @@
                             FontSize="Default"/>
 
                         <Label
+                            x:Name="Heartbeat"
+                            Text="Heartbeat: "
+                            TextColor="Black"
+                            FontSize="Default"/>
+                        
+                        <Label
                             x:Name="CircleCenter"
                             Text="Center: "
                             TextColor="Black"
@@ -151,6 +157,12 @@
                         <Label
                             x:Name="Direction"
                             Text="Direction: "
+                            TextColor="Black"
+                            FontSize="Default"/>
+
+                        <Label
+                            x:Name="Mass"
+                            Text="Mass: "
                             TextColor="Black"
                             FontSize="Default"/>
 
@@ -184,14 +196,6 @@
                             BackgroundColor="GhostWhite"
                             IsVisible="false"
                             Clicked="RestartButtonClicked"/>
-
-                        <Button
-                            x:Name="Split"
-                            Text="Split!"
-                            TextColor="Black"
-                            BackgroundColor="GhostWhite"
-                            Clicked="SplitButtonClicked"
-                            IsVisible="false"/>
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
