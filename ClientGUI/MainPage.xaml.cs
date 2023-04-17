@@ -55,11 +55,6 @@ namespace ClientGUI
         private System.Timers.Timer timer = new();
 
         /// <summary>
-        ///     The clientPlayer object.
-        /// </summary>
-        Player clientPlayer = null;
-
-        /// <summary>
         ///     A field where it stores the value of heartbeat.
         /// </summary>
         private int heartbeat = 0;
@@ -121,11 +116,11 @@ namespace ClientGUI
                 FoodCount.Text = $"Amount of Food: {worldDrawable.world.FoodList.Count()}";
 
                 // Get the client player object.
-                if (worldDrawable.world.GetClientPlayer(out clientPlayer))
+                if (worldDrawable.world.GetClientPlayer())
                 {
-                    CircleCenter.Text = $"Center: {clientPlayer.X:F2}, {clientPlayer.Y:F2}";
-                    Direction.Text = $"Direction: {clientPlayer.Location:F2}";
-                    Mass.Text = $"Mass: {clientPlayer.Mass:F2}";
+                    CircleCenter.Text = $"Center: {worldDrawable.world.ClientPlayer.X:F2}, {worldDrawable.world.ClientPlayer.Y:F2}";
+                    Direction.Text = $"Direction: {worldDrawable.world.ClientPlayer.Location:F2}";
+                    Mass.Text = $"Mass: {worldDrawable.world.ClientPlayer.Mass:F2}";
                 }
             });
 
@@ -144,16 +139,14 @@ namespace ClientGUI
             Point? mousePosition = null;
 
             // Gets the mouse position.
-            if (timer.Enabled && clientPlayer != null)
+            if (timer.Enabled && worldDrawable.world.ClientPlayer != null)
             {
                 mousePosition = e.GetPosition(PlaySurface);
 
                 // Get Player's X position.
-                //int mousePositionX = (int)clientPlayer.X + (int)mousePosition.Value.X - 400;
                 int mousePositionX = (int)(mousePosition.Value.X * (worldDrawable.world.WindowWidth / worldDrawable.Width));
 
                 // Get Player's Y position.
-                //int mousePositionY = (int)clientPlayer.Y + (int)mousePosition.Value.Y - 400;
                 int mousePositionY = (int)(mousePosition.Value.Y * (worldDrawable.world.WindowHeight / worldDrawable.Height));
 
                 // Send Move request to the server.
@@ -178,8 +171,8 @@ namespace ClientGUI
         void OnTap(object sender, EventArgs e)
         {
             // Send split message
-            float worldCircleX = clientPlayer.X;
-            float worldCircleY = clientPlayer.Y;
+            float worldCircleX = worldDrawable.world.ClientPlayer.X;
+            float worldCircleY = worldDrawable.world.ClientPlayer.Y;
 
             // Convert the coordinates from world to screen.
             worldDrawable.ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, worldDrawable.world.WindowWidth, worldDrawable.world.WindowHeight, out int screenCircleX, out int screenCircleY, worldDrawable.screenWidth, worldDrawable.screenHeight);
@@ -192,29 +185,6 @@ namespace ClientGUI
             {
                 networking.Send(message);
                 logger.LogInformation($"Split button was clicked. Message sent to server: {message}");
-            }
-        }
-
-        /// <summary>
-        ///     Handles when the mouse is dragged on the PlaySurface.
-        ///     It helps you when zooming in and out.
-        /// </summary>
-        /// <param name="sender"> ignored </param>
-        /// <param name="e"> The pan event that is occuring </param>
-        void PanUpdated(object sender, PanUpdatedEventArgs e)
-        {
-            if (e.StatusType == GestureStatus.Running)
-            {
-                Dispatcher.Dispatch(() =>
-                {
-                    Restart.IsVisible = true;
-                    Restart.Text = "hello";
-                });
-
-                // TODO - Convert coordinates
-
-                // Redraw the canvas.
-                PlaySurface.Invalidate();
             }
         }
 
@@ -246,7 +216,6 @@ namespace ClientGUI
 
                         // Put the user name in the networking object.
                         networking.ID = EntryPlayerName.Text;
-                        //worldDrawable.world.PlayerName = EntryPlayerName.Text;
 
                         // Try connecting to server.
                         ConnectToServer();
@@ -320,7 +289,7 @@ namespace ClientGUI
         void RestartButtonClicked(object sender, EventArgs e)
         {
             //worldDrawable.world.PlayerName = EntryPlayerName.Text;
-            clientPlayer = null;
+            worldDrawable.world.ClientPlayer = null;
 
             networking.Connect(EntryServer.Text, 11000);
 
@@ -414,9 +383,9 @@ namespace ClientGUI
                 worldDrawable.world.PlayerID = playerID;
 
                 // Get the client player object.
-                worldDrawable.world.GetClientPlayer(out clientPlayer);
+                worldDrawable.world.GetClientPlayer();
 
-                clientPlayer.Name = EntryPlayerName.Text;
+                worldDrawable.world.ClientPlayer.Name = EntryPlayerName.Text;
             }
             if (message.StartsWith(Protocols.CMD_Dead_Players))
             {
