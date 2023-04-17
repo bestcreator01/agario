@@ -4,7 +4,7 @@ Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  seointhenerd, bestcreator01
 Repo:       https://github.com/uofu-cs3500-spring23/assignment8agario-northkoreannotsouth
 Date:       17-Apr-2023 11:50 PM
-Project:    TowardAgarioStepThree
+Project:    Logger
 Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not be copied for use 
 in Academic Coursework.
 ```

@@ -1,5 +1,4 @@
-﻿using Communications;
-using AgarioModels;
+﻿using AgarioModels;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 using Food = AgarioModels.Food;
@@ -7,7 +6,7 @@ using Food = AgarioModels.Food;
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
 /// Partner:    Seoin Kim and Gloria Shin
-/// Date:       14-Apr-2023
+/// Date:       17-Apr-2023
 /// Course:     CS 3500, University of Utah, School of Computing
 /// Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not 
 /// be copied for use in Academic Courswork.
@@ -21,44 +20,44 @@ using Food = AgarioModels.Food;
 ///     
 /// </summary>
 
-try
-{
-    Networking channel = new(NullLogger.Instance, onConnect, onDisconnect, onMessage, '\n');
-    channel.Connect("localhost", 11000);
-    Console.WriteLine("Connected to localhost!");
-    channel.AwaitMessagesAsync(infinite: true);
-}
-catch (Exception ex)
-{
-    Console.WriteLine(ex.Message);
-    return;
-}
+//try
+//{
+//    Networking channel = new(NullLogger.Instance, onConnect, onDisconnect, onMessage, '\n');
+//    channel.Connect("localhost", 11000);
+//    Console.WriteLine("Connected to localhost!");
+//    channel.AwaitMessagesAsync(infinite: true);
+//}
+//catch (Exception ex)
+//{
+//    Console.WriteLine(ex.Message);
+//    return;
+//}
 
-Console.ReadLine();
+//Console.ReadLine();
 
-void onConnect(Networking channel)
-{
+//void onConnect(Networking channel)
+//{
 
-}
+//}
 
-void onDisconnect(Networking channel)
-{
-    channel.Disconnect();
-}
+//void onDisconnect(Networking channel)
+//{
+//    channel.Disconnect();
+//}
 
-void onMessage(Networking channel, string message)
-{
-    if (message.StartsWith(Protocols.CMD_Food))
-    {
-        //Console.WriteLine($"{message}");
+//void onMessage(Networking channel, string message)
+//{
+//    if (message.StartsWith(Protocols.CMD_Food))
+//    {
+//        //Console.WriteLine($"{message}");
 
-        Food[] food = JsonSerializer.Deserialize<Food[]>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
+//        Food[] food = JsonSerializer.Deserialize<Food[]>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
         
-        for (int i = 0; i < 10; i++)
-        {
-            Console.WriteLine($"{i}: color - {food[i].ARGBcolor}, mass - {food[i].Mass}, X - {food[i].X}, Y - {food[i].Y}");
-        }
-    }
+//        for (int i = 0; i < 10; i++)
+//        {
+//            Console.WriteLine($"{i}: color - {food[i].ARGBcolor}, mass - {food[i].Mass}, X - {food[i].X}, Y - {food[i].Y}");
+//        }
+//    }
 
     //string[] messages = JsonSerializer.Deserialize<string[]>
     //    (Protocols.CMD_Food,
@@ -86,4 +85,4 @@ void onMessage(Networking channel, string message)
     //     Protocols.CMD_Split,
     //     Protocols.CMD_Split_Recognizer) ?? Array.Empty<Food>();
     //Console.WriteLine($"The message is: {message}");
-}
+//}

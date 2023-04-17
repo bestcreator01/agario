@@ -32,7 +32,7 @@ in Academic Coursework.
 
 	1. Assignment Eight - Agario Client
 		Predicted Hours:	22
-		Actual Hours:		5 + 5 + 8
+		Actual Hours:		26
 
 		Note:
 
@@ -80,6 +80,8 @@ in Academic Coursework.
 # Additional Features and Design Decisions
 	
 	There are no specific additional features, but we decorated the windows with pink color.
+	
+	Important note: Our splitting works when you left click the mouse. It does not work with pressing the space bar.
 
 # Testing
 	
