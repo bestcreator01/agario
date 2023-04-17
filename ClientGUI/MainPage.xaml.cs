@@ -144,10 +144,10 @@ namespace ClientGUI
                 mousePosition = e.GetPosition(PlaySurface);
 
                 // Get Player's X position.
-                int mousePositionX = (int)(mousePosition.Value.X * (worldDrawable.world.WindowWidth / worldDrawable.Width));
+                int mousePositionX = (int)(mousePosition.Value.X * (worldDrawable.world.WorldWidth / worldDrawable.Width));
 
                 // Get Player's Y position.
-                int mousePositionY = (int)(mousePosition.Value.Y * (worldDrawable.world.WindowHeight / worldDrawable.Height));
+                int mousePositionY = (int)(mousePosition.Value.Y * (worldDrawable.world.WorldHeight / worldDrawable.Height));
 
                 // Send Move request to the server.
                 string message = String.Format(Protocols.CMD_Move, mousePositionX, mousePositionY);
@@ -175,7 +175,7 @@ namespace ClientGUI
             float worldCircleY = worldDrawable.world.ClientPlayer.Y;
 
             // Convert the coordinates from world to screen.
-            worldDrawable.ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, worldDrawable.world.WindowWidth, worldDrawable.world.WindowHeight, out int screenCircleX, out int screenCircleY, worldDrawable.screenWidth, worldDrawable.screenHeight);
+            worldDrawable.ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, worldDrawable.world.WorldWidth, worldDrawable.world.WorldHeight, out int screenCircleX, out int screenCircleY, worldDrawable.screenWidth, worldDrawable.screenHeight);
             string message = string.Format(Protocols.CMD_Split, screenCircleX + 100, screenCircleY + 100);
 
             Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
