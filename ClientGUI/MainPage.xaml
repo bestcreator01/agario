@@ -127,8 +127,8 @@
                             <!--mouse-->
                             <TapGestureRecognizer Tapped="OnTap"/>
                             <!--spacebar-->
-                            <PanGestureRecognizer PanUpdated="PanUpdated"/>
-                            <!--zooming in-->
+                            <!--<PanGestureRecognizer PanUpdated="PanUpdated"/>
+                            --><!--zooming in-->
                         </GraphicsView.GestureRecognizers>
                     </GraphicsView>
 
