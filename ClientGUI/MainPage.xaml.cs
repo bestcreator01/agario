@@ -5,8 +5,6 @@ using Microsoft.Extensions.Logging;
 using AgarioModels;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Runtime.CompilerServices;
-using Windows.Media.Capture;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -104,7 +102,7 @@ namespace ClientGUI
         /// <param name="args"> An object containing event data for the elapsed event (not used in this method). </param>
         void GameStep(object state, ElapsedEventArgs args)
         {
-            // Tell the world model to AdvanceGameOneStep.`
+            // Tell the world model to AdvanceGameOneStep.
             worldDrawable.gameObject.AdvanceGameOneStep();
 
             // Tell the play surface to redraw itself.
@@ -169,9 +167,6 @@ namespace ClientGUI
                     networking.Send(message);
                     logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
                 }
-
-                // Redraw the circle.
-                PlaySurface.Invalidate();
             }
         }
 
@@ -208,7 +203,19 @@ namespace ClientGUI
         /// <param name="e"> The pan event that is occuring </param>
         void PanUpdated(object sender, PanUpdatedEventArgs e)
         {
-            // TODO
+            if (e.StatusType == GestureStatus.Running)
+            {
+                Dispatcher.Dispatch(() =>
+                {
+                    Restart.IsVisible = true;
+                    Restart.Text = "hello";
+                });
+
+                // TODO - Convert coordinates
+
+                // Redraw the canvas.
+                PlaySurface.Invalidate();
+            }
         }
 
         /// <summary>
