@@ -65,10 +65,10 @@ namespace ClientGUI
         public MainPage(ILogger<MainPage> _logger)
         {
             InitializeComponent();
-            worldDrawable = new();
-
             logger = _logger;
-            logger.LogInformation("This is a ChatClient MainPage.xaml.cs constructor.");
+
+            worldDrawable = new(logger);
+            logger.LogInformation("This is a ClientGUI MainPage.xaml.cs constructor.");
         }
 
         /// <summary>
@@ -128,8 +128,6 @@ namespace ClientGUI
 
             double fps = (DateTime.Now - lastFrameTime).TotalMilliseconds / 1000;
             lastFrameTime = DateTime.Now;
-
-            // Update the position of the player.
 
             // Update the GUI labels to show the current location of the circle and its direction.
             Dispatcher.Dispatch(() =>
@@ -328,7 +326,7 @@ namespace ClientGUI
 
             // Start receiving messages from server.
             new Thread(() => networking.AwaitMessagesAsync(infinite: true)).Start();
-            worldDrawable = new();
+            worldDrawable = new(logger);
             InitializeGameLogic();
 
             // Frontend (GUI) part
@@ -395,7 +393,6 @@ namespace ClientGUI
         void OnDisconnect(Networking channel)
         {
             // Send a message to the server that this client is disconnected.
-            //networking.Disconnect();
             logger.LogInformation($"The client just disconnected.");
         }
 

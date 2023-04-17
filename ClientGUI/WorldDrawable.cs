@@ -52,12 +52,19 @@ namespace ClientGUI
         public int screenHeight;
 
         /// <summary>
+        ///     The logger object that will be used for debugging purposes.
+        /// </summary>
+        private readonly ILogger _logger;
+
+        /// <summary>
         ///     Constructor of WorldDrawable
         /// </summary>
-        public WorldDrawable()
+        public WorldDrawable(ILogger logger)
         {
             world = new();
             gameObject = new();
+            _logger = logger;
+            world.logger = _logger;
         }
 
         /// <summary>
@@ -90,13 +97,15 @@ namespace ClientGUI
             canvas.StrokeColor = Colors.Black;
             canvas.StrokeSize = 2;
             canvas.FillRectangle(0, 0, Width, Height);
+
+            _logger.LogInformation($"Drawing the play surface on screen.");
         }
 
         /// <summary>
-        /// TODO
+        ///     A helper method to draw foods.
         /// </summary>
-        /// <param name="canvas"></param>
-        /// <param name="foods"></param>
+        /// <param name="canvas"> The canvas object to draw on. </param>
+        /// <param name="foods"> The food objects that will be drawn on canvas. </param>
         private void DrawFoods(ICanvas canvas, Dictionary<long, Food> foods)
         {
             lock (world.FoodList)
@@ -117,13 +126,15 @@ namespace ClientGUI
                     canvas.FillCircle(screenX, screenY, radius);
                 }
             }
+
+            _logger.LogInformation($"Just drew the food lists on screen. They will be keep on updating.");
         }
 
         /// <summary>
-        /// TODO
+        ///     A helper method to draw players.
         /// </summary>
-        /// <param name="canvas"></param>
-        /// <param name="players"></param>
+        /// <param name="canvas"> The canvas object to draw on. </param>
+        /// <param name="players"> The player objects that will be drawn on canvas. </param>
         private void DrawPlayers(ICanvas canvas, Dictionary<long, Player> players)
         {
             lock (world.PlayerList)
@@ -145,6 +156,8 @@ namespace ClientGUI
                     canvas.DrawString(player.Name, screenCircleX, screenCircleY, HorizontalAlignment.Center);
                 }
             }
+
+            _logger.LogInformation($"Just drew the player lists on screen. They will be keep on updating.");
         }
 
         /// <summary>
