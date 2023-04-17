@@ -63,6 +63,7 @@ namespace ClientGUI
         {
             world = new();
             gameObject = new();
+
             _logger = logger;
             world.logger = _logger;
         }

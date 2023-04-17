@@ -58,6 +58,7 @@
                             TextColor="Black"
                             BackgroundColor="GhostWhite"
                             WidthRequest="300"/>
+
                     </HorizontalStackLayout>
 
                     <HorizontalStackLayout
@@ -134,8 +135,16 @@
                     <!-- Display information about the game -->
                     <VerticalStackLayout
                         Spacing="20"
-                        HorizontalOptions="End"
+                        HorizontalOptions="Center"
                         VerticalOptions="Center">
+
+                        <Label
+                            x:Name="InfoTitle"
+                            Text="[Game Information]"
+                            TextColor="Black"
+                            FontSize="Header"
+                            FontAttributes="Bold"/>
+
                         <Label
                             x:Name="FPS"
                             Text="FPS: "
@@ -147,7 +156,7 @@
                             Text="Heartbeat: "
                             TextColor="Black"
                             FontSize="Default"/>
-                        
+
                         <Label
                             x:Name="CircleCenter"
                             Text="Center: "
@@ -177,11 +186,7 @@
                             Text="Amount of Food: "
                             TextColor="Black"
                             FontSize="Default"/>
-                    </VerticalStackLayout>
 
-                    <VerticalStackLayout
-                        HorizontalOptions="End"
-                        VerticalOptions="Center">
                         <Label
                             x:Name="Dead"
                             Text=""

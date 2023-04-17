@@ -12,6 +12,8 @@ in Academic Coursework.
 # Comments to Evaluators:
 
 	Important note: Our splitting works when you left click the mouse. It does not work with pressing the space bar.
+	When player becomes laggy and somehow stops at some point(it is not technically being stopped) try left-clicking the mouse
+	outside the screen, on the white background.
 
 # Assignment Specific Topics
 

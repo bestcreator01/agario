@@ -90,6 +90,7 @@ namespace ClientGUI
 
             // The Timer should have a Tick event that calls a method GameStep.
             timer = new(2_000);
+            timer.Interval = 30;
             timer.Elapsed += GameStep;
             timer.Start();
             logger.LogInformation($"Game is initialized.");
@@ -181,8 +182,6 @@ namespace ClientGUI
         /// <param name="e"> ignored </param>
         void OnTap(object sender, EventArgs e)
         {
-            // TODO - write this functionality in README.
-            
             // Send split message
             float worldCircleX = clientPlayer.X;
             float worldCircleY = clientPlayer.Y;
@@ -426,6 +425,8 @@ namespace ClientGUI
                         {
                             Dispatcher.Dispatch(() =>
                             {
+                                Dead.IsVisible = true;
+                                Dead.Text = "HAHA YOU ARE DEAD!";
                                 Restart.IsVisible = true;
                             });
                         }
