@@ -353,7 +353,7 @@ namespace ClientGUI
         /// <param name="message"> The message that was received. </param>
         void OnMessage(Networking channel, string message)
         {
-            logger.LogInformation($"Just received a message from the server: {message}");
+            //logger.LogInformation($"Just received a message from the server: {message}");
 
             if (message.StartsWith(Protocols.CMD_Food))
             {
