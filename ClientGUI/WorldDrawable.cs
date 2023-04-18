@@ -1,6 +1,7 @@
 ﻿using AgarioModels;
 using Microsoft.Extensions.Logging;
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -41,6 +42,19 @@ namespace ClientGUI
         public World world;
         public GameObject gameObject;
 
+        private float worldClientPlayerX;
+        private float worldClientPlayerY;
+        private float worldClientPlayerRadius;
+        private int clientPlayerColor;
+
+        private float screenClientPlayerX;
+        private float screenClientPlayerY;
+
+        float leftXOfScreen;
+        float rightXOfScreen;
+        float topYOfScreen;
+        float bottomYOfScreen;
+
         /// <summary>
         ///     The logger object that will be used for debugging purposes.
         /// </summary>
@@ -65,34 +79,13 @@ namespace ClientGUI
         /// <param name="dirtyRect"> The area of the canvas that needs to be redrawn. </param>
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
-            if (world.ClientPlayer != null)
-            {
-
-                // Center the clientPlayer on the PlaySurface.
-                float clientPlayerScreenX = Width / 2;
-                float clientPlayerScreenY = Height / 2;
-
-                if (world.ClientPlayer.X + world.ClientPlayer.CircleRadius <= world.WorldWidth
-                    && world.ClientPlayer.X - world.ClientPlayer.CircleRadius >= 0)
-                {
-                    // TODO - Draw the player on the center.
-                }
-
-                // TODO - Convert the coordinates of the rest of the players.
-                // TODO - Draw the rest of the players.
-
-                // TODO - Scale the size of foods and players.
-
-            }
-
-
             DrawPlaySurface(canvas);
 
             if (world.FoodList.Count > 0 && world.ClientPlayer != null)
             {
                 DrawFoods(canvas, world.FoodList);
             }
-            if (world.PlayerList.Count > 0 && world.ClientPlayer != null)
+            if (world.PlayerList.Count > 0)
             {
                 DrawPlayers(canvas, world.PlayerList);
             }
@@ -119,59 +112,50 @@ namespace ClientGUI
         /// <param name="foods"> The food objects that will be drawn on canvas. </param>
         private void DrawFoods(ICanvas canvas, Dictionary<long, Food> foods)
         {
-            lock (world.FoodList)
+            lock (foods)
             {
                 // Convert the coordinates of foods.
                 // Draw all the foods in the screen.
                 foreach (var food in foods.Values)
                 {
+                    // Assign values onto the player variables
+                    worldClientPlayerX = world.ClientPlayer.X;
+                    worldClientPlayerY = world.ClientPlayer.Y;
+                    worldClientPlayerRadius = world.ClientPlayer.CircleRadius;
+                    clientPlayerColor = world.ClientPlayer.ARGBColor;
+
                     // Food variables
                     float worldFoodX = food.X;
                     float worldFoodY = food.Y;
                     float worldFoodRadius = food.CircleRadius;
                     int foodColor = food.ARGBColor;
 
-                    // Player variables
-                    float worldPlayerX = world.ClientPlayer.X;
-                    float worldPlayerY = world.ClientPlayer.Y;
-                    float worldPlayerRadius = world.ClientPlayer.CircleRadius;
-                    int playerColor = world.ClientPlayer.ARGBColor;
+                    // Convert the player coordinates from world to screen.
+                    ConvertFromWorldToScreenFoodOrPlayer(worldClientPlayerX, worldClientPlayerY, world.WorldWidth, world.WorldHeight,
+                                                        out screenClientPlayerX, out screenClientPlayerY, Width, Height);
 
                     // Convert the food coordinates from world to screen.
-                    ConvertFromWorldToScreenFoodOrPlayer(worldFoodX, worldFoodY, world.WorldWidth, world.WorldHeight, 
-                                                        out int screenFoodX, out int screenFoodY, Width, Height);
+                    ConvertFromWorldToScreenFoodOrPlayer(worldFoodX, worldFoodY, world.WorldWidth, world.WorldHeight,
+                                                        out float screenFoodX, out float screenFoodY, Width, Height);
 
-                    // Convert the player coordinates from world to screen.
-                    ConvertFromWorldToScreenFoodOrPlayer(worldPlayerX, worldPlayerY, world.WorldWidth, world.WorldHeight,
-                                                        out int screenPlayerX, out int screenPlayerY, Width, Height);
-                    
-                    float leftXOfScreen = world.ClientPlayer.X - Width / 2;
-                    float rightXOfScreen = world.ClientPlayer.X + Width / 2;
+                    // Screen variables - 800 x 800 (Width * Height)
+                    leftXOfScreen = worldClientPlayerX - Width / 2;
+                    rightXOfScreen = worldClientPlayerY + Width / 2;
+                    topYOfScreen = worldClientPlayerY - Height / 2;
+                    bottomYOfScreen = worldClientPlayerY + Height / 2;
+
+                    bool IsInTheScreenCoordinates = (worldFoodX >= leftXOfScreen && worldFoodX <= rightXOfScreen)
+                                                && (worldFoodY >= topYOfScreen && worldFoodY <= bottomYOfScreen);
 
                     // If the food is in the screen coordinates, you draw it.
-                    if (food.X >= leftXOfScreen || food.X <= rightXOfScreen)
+                    if (IsInTheScreenCoordinates)
                     {
-                        // TODO - Draw the food.
-                        // TODO - Convert the coordinates from world to screen.
+                        // Draw the food on canvas.
+                        canvas.FillColor = Color.FromInt(foodColor);
+                        canvas.FillCircle(screenFoodX, screenFoodY, worldFoodRadius); // ??? - not sure about radius.
                     }
                 }
-
-
-                foreach (var food in foods.Values)
-                {
-                    // Assign the parameters you need for drawing objects.
-                    float worldCircleX = food.X;
-                    float worldCircleY = food.Y;
-                    float radius = food.CircleRadius;
-                    int color = food.ARGBColor;
-                    ConvertFromWorldToScreenFoodOrPlayer(worldCircleX, worldCircleY, world.WorldWidth, world.WorldHeight, out int screenX, out int screenY, Width, Height);
-
-                    // Draw on canvas
-                    canvas.FillColor = Color.FromInt(color);
-                    canvas.FillCircle(screenX, screenY, radius);
-                }
             }
-
             _logger.LogInformation($"Just drew the food lists on screen. They will be keep on updating.");
         }
 
@@ -182,23 +166,52 @@ namespace ClientGUI
         /// <param name="players"> The player objects that will be drawn on canvas. </param>
         private void DrawPlayers(ICanvas canvas, Dictionary<long, Player> players)
         {
-            lock (world.PlayerList)
+            lock (players)
             {
                 foreach (var player in players.Values)
                 {
-                    // Assign the parameters you need for drawing objects.
-                    float worldCircleX = 0; float worldCircleY = 0; float radius = 0; int color = 0;
+                    //float screenClientPlayerX = Width / 2;
+                    float screenClientPlayerX = 0;
+                    //float screenClientPlayerY = Height / 2;
+                    float screenClientPlayerY = 0;
+                    float screenPlayerRadius = (float)(Math.Sqrt(player.Mass / Math.PI));
+                    int playerColor = player.ARGBColor;
 
-                    worldCircleX = player.X;
-                    worldCircleY = player.Y;
-                    color = player.ARGBColor;
-                    ConvertFromWorldToScreenFoodOrPlayer(worldCircleX, worldCircleY, world.WorldWidth, world.WorldHeight, out int screenCircleX, out int screenCircleY, Width, Height);
-                    radius = (float)(Math.Sqrt(player.Mass / Math.PI));
+                    if (player.ID == world.PlayerID)
+                    {
+                        ConvertFromWorldToScreenClient(world.ClientPlayer.X, world.ClientPlayer.Y, out screenClientPlayerX, out screenClientPlayerY);
 
-                    // Draw on canvas
-                    canvas.FillColor = Color.FromInt(color);
-                    canvas.FillCircle(screenCircleX, screenCircleY, radius);
-                    canvas.DrawString(player.Name, screenCircleX, screenCircleY, HorizontalAlignment.Center);
+                        //bool IsInWorldCoordinates = world.ClientPlayer.X + world.ClientPlayer.CircleRadius <= world.WorldWidth
+                        //                                && world.ClientPlayer.X - world.ClientPlayer.CircleRadius >= 0;
+
+                        //if (IsInWorldCoordinates)
+                        //{
+                        // Draw the ClientPlayer on canvas.
+                        canvas.FillColor = Color.FromInt(clientPlayerColor);
+                        canvas.FillCircle(screenClientPlayerX, screenClientPlayerY, screenPlayerRadius); // ??? - not sure about radius.
+                        canvas.DrawString(player.Name, screenClientPlayerX, screenClientPlayerY, HorizontalAlignment.Center);
+                        //}
+                    }
+                    else
+                    {
+                        float worldPlayerX = player.X;
+                        float worldPlayerY = player.Y;
+
+                        // Convert the player coordinates from world to screen.
+                        ConvertFromWorldToScreenFoodOrPlayer(worldPlayerX, worldPlayerY, world.WorldWidth, world.WorldHeight,
+                                                            out float screenPlayerX, out float screenPlayerY, Width, Height);
+
+                        bool IsInTheScreenCoordinates = (worldPlayerX >= leftXOfScreen && worldPlayerX <= rightXOfScreen)
+                                                        && (worldPlayerY >= topYOfScreen && worldPlayerY <= bottomYOfScreen);
+
+                        if (IsInTheScreenCoordinates)
+                        {
+                            // Draw the player on canvas.
+                            canvas.FillColor = Color.FromInt(playerColor);
+                            canvas.FillCircle(screenPlayerX, screenPlayerY, screenPlayerRadius);
+                            canvas.DrawString(player.Name, screenPlayerX, screenPlayerX, HorizontalAlignment.Center);
+                        }
+                    }
                 }
             }
 
@@ -224,7 +237,7 @@ namespace ClientGUI
         /// <param name="screen_h"></param>
         private void ConvertFromWorldToScreen(
         in float world_w, in float world_h,
-        out int screen_w, out int screen_h)
+        out float screen_w, out float screen_h)
         {
             // Calculate the screen coordinates based on the lecture slides.
             screen_w = (int)(world_w / 5000.0F * Width);
@@ -245,13 +258,34 @@ namespace ClientGUI
         /// <param name="screenHeight">The height of the screen in pixels.</param>        
         public void ConvertFromWorldToScreenFoodOrPlayer(
             in float worldCircleX, in float worldCircleY, in float worldWidth, in float worldHeight,
-            out int screenCircleX, out int screenCircleY, in float screenWidth, in float screenHeight)
+            out float screenCircleX, out float screenCircleY, in float screenWidth, in float screenHeight)
         {
-            float w_percentage = (float)(worldCircleX / worldWidth);
-            float h_percentage = (float)(worldCircleY / worldHeight);
+            float w_left_x = worldCircleX - (this.Width / 2);
+            float w_left_y = worldCircleY - (this.Height / 2);
 
-            screenCircleX = (int)(w_percentage * screenWidth);
-            screenCircleY = (int)(h_percentage * screenHeight);
+            //float w_percentage = (float)(worldCircleX / worldWidth);
+            //float h_percentage = (float)(worldCircleY / worldHeight);
+
+            screenCircleX = (int)(worldCircleX - w_left_x);
+            screenCircleY = (int)(worldCircleY - w_left_y);
+            //screenCircleX = (int)(w_percentage * screenWidth);
+            //screenCircleY = (int)(h_percentage * screenHeight);
+        }
+
+
+        public void ConvertFromWorldToScreenClient(in float worldX, in float worldY, out float screenX, out float screenY)
+        {
+            float w_left_x = worldX - (this.Width / 2);
+            float w_left_y = worldY - (this.Height / 2);
+
+            float offset_x = worldX - w_left_x;
+            float offset_y = worldY - w_left_y;
+            float w_portal = 800;
+            float w_percentage_x = offset_x / w_portal;
+            float w_percentage_y = offset_y / w_portal;
+
+            screenX = w_percentage_x * w_portal;
+            screenY = w_percentage_y * w_portal;
         }
     }
 }

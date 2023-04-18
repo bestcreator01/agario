@@ -174,9 +174,10 @@ namespace ClientGUI
             float worldCircleX = worldDrawable.world.ClientPlayer.X;
             float worldCircleY = worldDrawable.world.ClientPlayer.Y;
 
-            // Convert the coordinates from world to screen.
-            worldDrawable.ConvertFromWorldToScreenFoodAndPlayer(worldCircleX, worldCircleY, worldDrawable.world.WorldWidth, worldDrawable.world.WorldHeight, out int screenCircleX, out int screenCircleY, worldDrawable.screenWidth, worldDrawable.screenHeight);
-            string message = string.Format(Protocols.CMD_Split, screenCircleX + 100, screenCircleY + 100);
+            //// Convert the coordinates from world to screen.
+            //worldDrawable.ConvertFromWorldToScreenFoodOrPlayer(worldCircleX, worldCircleY, worldDrawable.world.WorldWidth, worldDrawable.world.WorldHeight, out float screenCircleX, out float screenCircleY, worldDrawable.Width, worldDrawable.Height);
+            //string message = string.Format(Protocols.CMD_Split, screenCircleX + 100, screenCircleY + 100);
+            string message = string.Format(Protocols.CMD_Split, worldCircleX + 300, worldCircleY + 300);
 
             Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
             bool matchesWithRecognizer = match.Success;
