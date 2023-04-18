@@ -124,7 +124,7 @@ namespace ClientGUI
                 }
             });
 
-            //logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
+            logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
         }
 
         /* Manage the GUI controls. */
@@ -158,7 +158,7 @@ namespace ClientGUI
                 if (matchesWithRecognizer)
                 {
                     networking.Send(message);
-                    //logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
+                    logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
                 }
             }
         }
@@ -299,7 +299,7 @@ namespace ClientGUI
                 deadImage.IsVisible = false;
             });
 
-            //logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
+            logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
         }
 
         /// <summary>
@@ -328,7 +328,7 @@ namespace ClientGUI
             if (matchesWithRecognizer)
             {
                 channel.Send(startGameMessage + '\n');
-                //logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
+                logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
             }
         }
 
@@ -349,7 +349,7 @@ namespace ClientGUI
         /// <param name="message"> The message that was received. </param>
         void OnMessage(Networking channel, string message)
         {
-            //logger.LogInformation($"Just received a message from the server: {message}");
+            logger.LogInformation($"Just received a message from the server: {message}");
 
             if (message.StartsWith(Protocols.CMD_Food))
             {

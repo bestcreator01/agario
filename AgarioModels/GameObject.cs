@@ -112,7 +112,7 @@ namespace AgarioModels
             float windowWidth = 5000;
             float windowHeight = 5000;
 
-            // Add the direction vector to the circle. ????
+            // Add the direction vector to the circle.
             Location += Location;
 
             // If the circle moves off the rectangle to the left or right,

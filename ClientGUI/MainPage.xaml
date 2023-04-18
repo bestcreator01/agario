@@ -124,11 +124,7 @@
                         VerticalOptions="Center">
                         <GraphicsView.GestureRecognizers>
                             <PointerGestureRecognizer PointerMoved="PointerChanged"/>
-                            <!--mouse-->
                             <TapGestureRecognizer Tapped="OnTap"/>
-                            <!--spacebar-->
-                            <!--<PanGestureRecognizer PanUpdated="PanUpdated"/>
-                            --><!--zooming in-->
                         </GraphicsView.GestureRecognizers>
                     </GraphicsView>
 
