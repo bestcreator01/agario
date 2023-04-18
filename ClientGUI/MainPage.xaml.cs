@@ -124,7 +124,7 @@ namespace ClientGUI
                 }
             });
 
-            logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
+            //logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
         }
 
         /* Manage the GUI controls. */
@@ -158,7 +158,7 @@ namespace ClientGUI
                 if (matchesWithRecognizer)
                 {
                     networking.Send(message);
-                    logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
+                    //logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
                 }
             }
         }
@@ -170,20 +170,15 @@ namespace ClientGUI
         /// <param name="e"> ignored </param>
         void OnTap(object sender, EventArgs e)
         {
-            // Send split message
-            float worldCircleX = worldDrawable.world.ClientPlayer.X;
-            float worldCircleY = worldDrawable.world.ClientPlayer.Y;
-
-            //// Convert the coordinates from world to screen.
-            //worldDrawable.ConvertFromWorldToScreenFoodOrPlayer(worldCircleX, worldCircleY, worldDrawable.world.WorldWidth, worldDrawable.world.WorldHeight, out float screenCircleX, out float screenCircleY, worldDrawable.Width, worldDrawable.Height);
-            //string message = string.Format(Protocols.CMD_Split, screenCircleX + 100, screenCircleY + 100);
-            string message = string.Format(Protocols.CMD_Split, worldCircleX + 300, worldCircleY + 300);
+            // Convert the coordinates from world to screen.
+            string message = string.Format(Protocols.CMD_Split, (int)worldDrawable.screenClientPlayerX, (int)worldDrawable.screenClientPlayerY);
 
             Match match = Regex.Match(message, Protocols.CMD_Split_Recognizer);
             bool matchesWithRecognizer = match.Success;
 
             if (matchesWithRecognizer)
             {
+                // Send split message
                 networking.Send(message);
                 logger.LogInformation($"Split button was clicked. Message sent to server: {message}");
             }
@@ -301,9 +296,10 @@ namespace ClientGUI
             {
                 Dead.IsVisible = false;
                 Restart.IsVisible = false;
+                deadImage.IsVisible = false;
             });
 
-            logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
+            //logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
         }
 
         /// <summary>
@@ -332,7 +328,7 @@ namespace ClientGUI
             if (matchesWithRecognizer)
             {
                 channel.Send(startGameMessage + '\n');
-                logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
+                //logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
             }
         }
 
@@ -405,6 +401,8 @@ namespace ClientGUI
                                 Dead.IsVisible = true;
                                 Dead.Text = "HAHA YOU ARE DEAD!";
                                 Restart.IsVisible = true;
+                                deadImage.RelScaleTo(0.5);
+                                deadImage.IsVisible = true;
                             });
                         }
 

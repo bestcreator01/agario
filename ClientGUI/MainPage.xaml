@@ -135,15 +135,8 @@
                     <!-- Display information about the game -->
                     <VerticalStackLayout
                         Spacing="20"
-                        HorizontalOptions="Center"
+                        HorizontalOptions="Start"
                         VerticalOptions="Start">
-
-                        <Label
-                            x:Name="InfoTitle"
-                            Text="[Game Information]"
-                            TextColor="Black"
-                            FontSize="Header"
-                            FontAttributes="Bold"/>
 
                         <Label
                             x:Name="FPS"
@@ -202,6 +195,11 @@
                             IsVisible="false"
                             Clicked="RestartButtonClicked"/>
                     </VerticalStackLayout>
+
+                    <Image
+                            x:Name="deadImage"
+                            Source="dead.jpg"
+                            IsVisible="false"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </ScrollView>

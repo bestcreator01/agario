@@ -79,8 +79,7 @@ in Academic Coursework.
 
 # Additional Features and Design Decisions
 	
-	There are no specific additional features, but we decorated the windows with pink color.
-	
+	We decided to pop up a fun image when the client player dies.
 	Important note: Our splitting works when you left click the mouse. It does not work with pressing the space bar.
 
 # Testing
