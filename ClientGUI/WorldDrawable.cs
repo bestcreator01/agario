@@ -85,7 +85,7 @@ namespace ClientGUI
             {
                 DrawFoods(canvas, world.FoodList);
             }
-            if (world.PlayerList.Count > 0)
+            if (world.PlayerList.Count > 0 && world.ClientPlayer != null)
             {
                 DrawPlayers(canvas, world.PlayerList);
             }
@@ -114,8 +114,6 @@ namespace ClientGUI
         {
             lock (foods)
             {
-                // Convert the coordinates of foods.
-                // Draw all the foods in the screen.
                 foreach (var food in foods.Values)
                 {
                     // Assign values onto the player variables
@@ -130,10 +128,6 @@ namespace ClientGUI
                     float worldFoodRadius = food.CircleRadius;
                     int foodColor = food.ARGBColor;
 
-                    // Convert the player coordinates from world to screen.
-                    ConvertFromWorldToScreenFoodOrPlayer(worldClientPlayerX, worldClientPlayerY, world.WorldWidth, world.WorldHeight,
-                                                        out screenClientPlayerX, out screenClientPlayerY, Width, Height);
-
                     // Convert the food coordinates from world to screen.
                     ConvertFromWorldToScreenFoodOrPlayer(worldFoodX, worldFoodY, world.WorldWidth, world.WorldHeight,
                                                         out float screenFoodX, out float screenFoodY, Width, Height);
@@ -141,8 +135,9 @@ namespace ClientGUI
                     // Screen variables - 800 x 800 (Width * Height)
                     leftXOfScreen = worldClientPlayerX - Width / 2;
                     rightXOfScreen = worldClientPlayerY + Width / 2;
-                    topYOfScreen = worldClientPlayerY - Height / 2;
+                    topYOfScreen = worldClientPlayerY - Height / 2;  
                     bottomYOfScreen = worldClientPlayerY + Height / 2;
+
 
                     bool IsInTheScreenCoordinates = (worldFoodX >= leftXOfScreen && worldFoodX <= rightXOfScreen)
                                                 && (worldFoodY >= topYOfScreen && worldFoodY <= bottomYOfScreen);
@@ -170,9 +165,7 @@ namespace ClientGUI
             {
                 foreach (var player in players.Values)
                 {
-                    //float screenClientPlayerX = Width / 2;
                     float screenClientPlayerX = 0;
-                    //float screenClientPlayerY = Height / 2;
                     float screenClientPlayerY = 0;
                     float screenPlayerRadius = (float)(Math.Sqrt(player.Mass / Math.PI));
                     int playerColor = player.ARGBColor;
@@ -181,11 +174,6 @@ namespace ClientGUI
                     {
                         ConvertFromWorldToScreenClient(world.ClientPlayer.X, world.ClientPlayer.Y, out screenClientPlayerX, out screenClientPlayerY);
 
-                        //bool IsInWorldCoordinates = world.ClientPlayer.X + world.ClientPlayer.CircleRadius <= world.WorldWidth
-                        //                                && world.ClientPlayer.X - world.ClientPlayer.CircleRadius >= 0;
-
-                        //if (IsInWorldCoordinates)
-                        //{
                         // Draw the ClientPlayer on canvas.
                         canvas.FillColor = Color.FromInt(clientPlayerColor);
                         canvas.FillCircle(screenClientPlayerX, screenClientPlayerY, screenPlayerRadius); // ??? - not sure about radius.
@@ -260,8 +248,8 @@ namespace ClientGUI
             in float worldCircleX, in float worldCircleY, in float worldWidth, in float worldHeight,
             out float screenCircleX, out float screenCircleY, in float screenWidth, in float screenHeight)
         {
-            float w_left_x = worldCircleX - (this.Width / 2);
-            float w_left_y = worldCircleY - (this.Height / 2);
+            float w_left_x = world.ClientPlayer.X - (this.Width / 2);
+            float w_left_y = world.ClientPlayer.Y - (this.Height / 2);
 
             //float w_percentage = (float)(worldCircleX / worldWidth);
             //float h_percentage = (float)(worldCircleY / worldHeight);
@@ -272,20 +260,27 @@ namespace ClientGUI
             //screenCircleY = (int)(h_percentage * screenHeight);
         }
 
-
-        public void ConvertFromWorldToScreenClient(in float worldX, in float worldY, out float screenX, out float screenY)
+        /// <summary>
+        ///     Converts a client object's position from world coordinates
+        ///     to screen coordinates.
+        /// </summary>
+        /// <param name="worldClientPlayerX">The X coordinate of the client player in world.</param>
+        /// <param name="worldClientPlayerY">The Y coordinate of the client player in world.</param>
+        /// <param name="screenClientPlayerX">The X coordinate of the client player in screen.</param>
+        /// <param name="screenClientPlayerY">The Y coordinate of the client player in screen.</param>
+        public void ConvertFromWorldToScreenClient(in float worldClientPlayerX, in float worldClientPlayerY, out float screenClientPlayerX, out float screenClientPlayerY)
         {
-            float w_left_x = worldX - (this.Width / 2);
-            float w_left_y = worldY - (this.Height / 2);
+            float w_left_x = worldClientPlayerX - (this.Width / 2);
+            float w_left_y = worldClientPlayerY - (this.Height / 2);
 
-            float offset_x = worldX - w_left_x;
-            float offset_y = worldY - w_left_y;
+            float offset_x = worldClientPlayerX - w_left_x;
+            float offset_y = worldClientPlayerY - w_left_y;
             float w_portal = 800;
             float w_percentage_x = offset_x / w_portal;
             float w_percentage_y = offset_y / w_portal;
 
-            screenX = w_percentage_x * w_portal;
-            screenY = w_percentage_y * w_portal;
+            screenClientPlayerX = w_percentage_x * w_portal;
+            screenClientPlayerY = w_percentage_y * w_portal;
         }
     }
 }
