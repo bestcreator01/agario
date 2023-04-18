@@ -59,27 +59,23 @@ namespace AgarioModels
         /// <summary>
         ///     Gets or sets the radius of the game object's circular shape.
         /// </summary>
-        public float CircleRadius { get; private set; } = 3;
+        public float CircleRadius
+        {
+            get
+            {
+                if (Mass > 0)
+                {
+                    return (float)(Math.Sqrt(Mass / Math.PI));
+                }
+                return 0;
+            }
+            private set { }
+        } 
 
         /// <summary>
         ///     Gets the mass of the game object, which is calculated from its radius.
         /// </summary>
-        public float Mass
-        {
-            get
-            {
-                if (_mass > 0)
-                    return _mass;
-                else
-                    return (float)(Math.PI * CircleRadius * CircleRadius);
-            }
-            private set { _mass = value; }
-        }
-
-        /// <summary>
-        ///     Backing field for the Mass property.
-        /// </summary>
-        private float _mass;
+        public float Mass { get; private set; }
 
         /// <summary>
         ///     A class representing a generic game object in the Agario game.
