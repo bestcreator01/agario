@@ -60,6 +60,9 @@ namespace ClientGUI
         float topYOfScreen;
         float bottomYOfScreen;
 
+        float offset_x;
+        float offset_y;
+
         float zoomConstant = 20;
 
         /// <summary>
@@ -146,15 +149,9 @@ namespace ClientGUI
                     ConvertFromWorldToScreenFoodOrPlayer(worldFoodX, worldFoodY, world.WorldWidth, world.WorldHeight,
                                                         out float screenFoodX, out float screenFoodY, Width, Height);
 
-                    float w_left_x = world.ClientPlayer.X - (this.Width / 2);
-                    float w_left_y = world.ClientPlayer.Y - (this.Height / 2);
 
-
-                    bool IsInTheScreenCoordinates = (screenFoodX <= screenClientPlayerX + w_left_x && screenFoodX >= screenClientPlayerX - w_left_x)
-                                                && (screenFoodY <= screenClientPlayerY + w_left_y && screenFoodY >= screenClientPlayerY - w_left_y);
-
-                    //bool IsInTheScreenCoordinates = (worldFoodX >= leftXOfScreen && worldFoodX <= rightXOfScreen)
-                    //                            && (worldFoodY >= topYOfScreen && worldFoodY <= bottomYOfScreen);
+                    bool IsInTheScreenCoordinates = (screenFoodX <= screenClientPlayerX + rightXOfScreen && screenFoodX >= screenClientPlayerX - leftXOfScreen)
+                                                && (screenFoodY <= screenClientPlayerY + topYOfScreen && screenFoodY >= screenClientPlayerY - bottomYOfScreen);
 
                     // If the food is in the screen coordinates, you draw it.
                     if (IsInTheScreenCoordinates)
@@ -191,8 +188,8 @@ namespace ClientGUI
                         canvas.FillCircle(screenClientPlayerX, screenClientPlayerY, worldClientPlayerRadius);
                         canvas.DrawString(player.Name, screenClientPlayerX, screenClientPlayerY, HorizontalAlignment.Center);
 
-                        Width = world.ClientPlayer.CircleRadius * 2 * zoomConstant;
-                        Height = world.ClientPlayer.CircleRadius * 2 * zoomConstant;
+                        Width = world.ClientPlayer.CircleRadius * zoomConstant + 400;
+                        Height = world.ClientPlayer.CircleRadius * zoomConstant + 400;
 
                         // TODO - Zoom in or out whenever the player's mass or radius changes.
                         //Width += screenPlayerRadius * zoomConstant;
@@ -207,13 +204,8 @@ namespace ClientGUI
                         ConvertFromWorldToScreenFoodOrPlayer(worldPlayerX, worldPlayerY, world.WorldWidth, world.WorldHeight,
                                                             out float screenPlayerX, out float screenPlayerY, Width, Height);
 
-                        //bool IsInTheScreenCoordinates = (worldPlayerX >= leftXOfScreen && worldPlayerX <= rightXOfScreen)
-                        //                                && (worldPlayerY >= topYOfScreen && worldPlayerY <= bottomYOfScreen);
-                        float w_left_x = world.ClientPlayer.X - (this.Width / 2);
-                        float w_left_y = world.ClientPlayer.Y - (this.Height / 2);
-
-                        bool IsInTheScreenCoordinates = (screenPlayerX <= screenClientPlayerX + w_left_x && screenPlayerX >= screenClientPlayerX - w_left_x)
-                            && (screenPlayerY <= screenClientPlayerY + w_left_y && screenPlayerY >= screenClientPlayerY - w_left_y);
+                        bool IsInTheScreenCoordinates = (screenPlayerX <= screenClientPlayerX + rightXOfScreen && screenPlayerX >= screenClientPlayerX - leftXOfScreen)
+                            && (screenPlayerY <= screenClientPlayerY + topYOfScreen && screenPlayerY >= screenClientPlayerY - bottomYOfScreen);
 
                         if (IsInTheScreenCoordinates)
                         {
@@ -271,11 +263,11 @@ namespace ClientGUI
             in float worldCircleX, in float worldCircleY, in float worldWidth, in float worldHeight,
             out float screenCircleX, out float screenCircleY, in float screenWidth, in float screenHeight)
         {
-            float w_left_x = world.ClientPlayer.X - (this.Width / 2);
-            float w_left_y = world.ClientPlayer.Y - (this.Height / 2);
+            offset_x = world.ClientPlayer.X - (this.Width / 2);
+            offset_y = world.ClientPlayer.Y - (this.Height / 2);
 
-            screenCircleX = worldCircleX - w_left_x;
-            screenCircleY = worldCircleY - w_left_y;
+            screenCircleX = worldCircleX - offset_x;
+            screenCircleY = worldCircleY - offset_y;
         }
 
         /// <summary>
@@ -288,16 +280,20 @@ namespace ClientGUI
         /// <param name="screenClientPlayerY">The Y coordinate of the client player in screen.</param>
         public void ConvertFromWorldToScreenClientPlayer(in float worldClientPlayerX, in float worldClientPlayerY, out float screenClientPlayerX, out float screenClientPlayerY)
         {
-            float w_left_x = worldClientPlayerX - (this.Width / 2);
-            float w_left_y = worldClientPlayerY - (this.Height / 2);
+            offset_x = worldClientPlayerX - (this.Width / 2);
+            offset_y = worldClientPlayerY - (this.Height / 2);
+            
+            float w_right_x = worldClientPlayerX + (this.Width / 2);
+            float w_right_y = worldClientPlayerY + (this.Height / 2);
 
-            float offset_x = worldClientPlayerX - w_left_x;
-            float offset_y = worldClientPlayerY - w_left_y;
             float w_percentage_x = offset_x / Width;
             float w_percentage_y = offset_y / Height;
 
             screenClientPlayerX = w_percentage_x * Width;
             screenClientPlayerY = w_percentage_y * Height;
+
+            screenClientPlayerX = (w_right_x - offset_x) / 2;
+            screenClientPlayerY = (w_right_y - offset_y) / 2;
         }
     }
 }
