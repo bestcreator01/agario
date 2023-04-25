@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using AgarioModels;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Data.SqlClient;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -58,6 +59,11 @@ namespace ClientGUI
         ///     A field where it stores the value of heartbeat.
         /// </summary>
         private int heartbeat = 0;
+
+        /// <summary>
+        ///     The exact time when the game started.
+        /// </summary>
+        DateTime startTime = DateTime.Now;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
@@ -124,7 +130,7 @@ namespace ClientGUI
                 }
             });
 
-            logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
+            //logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
         }
 
         /* Manage the GUI controls. */
@@ -158,7 +164,7 @@ namespace ClientGUI
                 if (matchesWithRecognizer)
                 {
                     networking.Send(message);
-                    logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
+                    //logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
                 }
             }
         }
@@ -299,7 +305,7 @@ namespace ClientGUI
                 deadImage.IsVisible = false;
             });
 
-            logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
+            //logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
         }
 
         /// <summary>
@@ -328,7 +334,7 @@ namespace ClientGUI
             if (matchesWithRecognizer)
             {
                 channel.Send(startGameMessage + '\n');
-                logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
+                //logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
             }
         }
 
@@ -344,13 +350,16 @@ namespace ClientGUI
 
         /// <summary>
         ///     Callback for when a message arrives on the network.
+        ///     
+        ///     References: https://learnsql.com/blog/how-to-rank-rows-in-sql/
         /// </summary>
         /// <param name="channel"> The networking channel where the message came from. </param>
         /// <param name="message"> The message that was received. </param>
         void OnMessage(Networking channel, string message)
         {
-            logger.LogInformation($"Just received a message from the server: {message}");
+            //logger.LogInformation($"Just received a message from the server: {message}");
 
+            // Initialize the date for recording purposes
             if (message.StartsWith(Protocols.CMD_Food))
             {
                 List<Food> foodList = JsonSerializer.Deserialize<List<Food>>(message.Substring(Protocols.CMD_Food.Length)) ?? throw new Exception("bad json");
@@ -379,6 +388,9 @@ namespace ClientGUI
                 // Assign the value to the PlayerID in World.
                 worldDrawable.world.PlayerID = playerID;
 
+                // Update time
+                startTime = DateTime.Now;
+
                 // Get the client player object.
                 worldDrawable.world.GetClientPlayer();
 
@@ -396,6 +408,35 @@ namespace ClientGUI
                         // If the player ID and one of the dead player's IDs are the same, show the restart button.
                         if (worldDrawable.world.PlayerID == deadPlayerID)
                         {
+                            // Record ending time.                            
+                            DateTime endTime = DateTime.Now;
+
+                            using (SqlConnection connection = new SqlConnection(WebServer.WebServer.connectionString))
+                            {
+                                connection.Open();
+
+                                int gameID = (int)worldDrawable.world.PlayerID;
+                                // Insert a new game record and retrieve the game ID.
+                                using (SqlCommand command = new SqlCommand("INSERT INTO Game (playerName, ID, endTime) VALUES (@playerName, @ID, @endTime);", connection))
+                                {
+                                    command.Parameters.AddWithValue("@playerName", worldDrawable.world.ClientPlayer.Name);
+                                    command.Parameters.AddWithValue("@ID", gameID);
+                                    command.Parameters.AddWithValue("@endTime", endTime);
+
+                                    // Insert the start time, mass, rank, and duration records.
+                                    using (SqlCommand command2 = new SqlCommand("INSERT INTO StartTime (playerName, startTime, GameID) VALUES (@playerName, @startTime, @gameId); INSERT INTO Mass (playerName, Mass, GameID) VALUES (@playerName, @mass, @gameId); INSERT INTO Rank (playerName, rank, GameID) VALUES (@playerName, (SELECT COUNT(*) + 1 FROM Mass WHERE GameID = @gameId AND Mass > (SELECT Mass FROM Mass WHERE GameID = @gameId AND playerName = @playerName)), @gameId); INSERT INTO Duration (playerName, HeartBeat, GameID) VALUES (@playerName, @duration, @gameId);", connection))
+                                    {
+                                        command2.Parameters.AddWithValue("@playerName", worldDrawable.world.ClientPlayer.Name);
+                                        command2.Parameters.AddWithValue("@startTime", startTime);
+                                        command2.Parameters.AddWithValue("@gameId", gameID);
+                                        command2.Parameters.AddWithValue("@mass", worldDrawable.world.ClientPlayer.Mass);
+                                        command2.Parameters.AddWithValue("@duration", heartbeat);
+
+                                        command2.ExecuteNonQuery();
+                                    }
+                                }
+                            }
+
                             Dispatcher.Dispatch(() =>
                             {
                                 Dead.IsVisible = true;
@@ -404,6 +445,7 @@ namespace ClientGUI
                                 deadImage.RelScaleTo(0.5);
                                 deadImage.IsVisible = true;
                             });
+
                         }
 
                         // Remove the IDs of dead players.
