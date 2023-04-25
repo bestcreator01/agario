@@ -417,23 +417,20 @@ namespace ClientGUI
 
                                 int gameID = (int)worldDrawable.world.PlayerID;
                                 // Insert a new game record and retrieve the game ID.
-                                using (SqlCommand command = new SqlCommand("INSERT INTO Game (playerName, ID, endTime) VALUES (@playerName, @ID, @endTime);", connection))
+                                using (SqlCommand command = new SqlCommand("INSERT INTO Game (playerName, ID, endTime) VALUES (@playerName, @ID, @endTime); " +
+                                    "INSERT INTO StartTime (playerName, startTime, ID) VALUES (@playerName, @startTime, @ID); " +
+                                    "INSERT INTO Mass (playerName, Mass, ID) VALUES (@playerName, @mass, @ID);" +
+                                    "INSERT INTO Rank (playerName, rank, ID) VALUES (@playerName, (SELECT COUNT(*) + 1 FROM Mass WHERE ID = @ID AND Mass > (SELECT Mass FROM Mass WHERE ID = @ID AND playerName = @playerName)), @ID);" +
+                                    "INSERT INTO Duration (playerName, HeartBeat, ID) VALUES (@playerName, @duration, @ID);", connection))
                                 {
                                     command.Parameters.AddWithValue("@playerName", worldDrawable.world.ClientPlayer.Name);
-                                    command.Parameters.AddWithValue("@ID", gameID);
+                                    command.Parameters.AddWithValue("@ID", worldDrawable.world.PlayerID);
+                                    command.Parameters.AddWithValue("@startTime", startTime);
                                     command.Parameters.AddWithValue("@endTime", endTime);
+                                    command.Parameters.AddWithValue("@mass", worldDrawable.world.ClientPlayer.Mass);
+                                    command.Parameters.AddWithValue("@duration", heartbeat);
 
-                                    // Insert the start time, mass, rank, and duration records.
-                                    using (SqlCommand command2 = new SqlCommand("INSERT INTO StartTime (playerName, startTime, GameID) VALUES (@playerName, @startTime, @gameId); INSERT INTO Mass (playerName, Mass, GameID) VALUES (@playerName, @mass, @gameId); INSERT INTO Rank (playerName, rank, GameID) VALUES (@playerName, (SELECT COUNT(*) + 1 FROM Mass WHERE GameID = @gameId AND Mass > (SELECT Mass FROM Mass WHERE GameID = @gameId AND playerName = @playerName)), @gameId); INSERT INTO Duration (playerName, HeartBeat, GameID) VALUES (@playerName, @duration, @gameId);", connection))
-                                    {
-                                        command2.Parameters.AddWithValue("@playerName", worldDrawable.world.ClientPlayer.Name);
-                                        command2.Parameters.AddWithValue("@startTime", startTime);
-                                        command2.Parameters.AddWithValue("@gameId", gameID);
-                                        command2.Parameters.AddWithValue("@mass", worldDrawable.world.ClientPlayer.Mass);
-                                        command2.Parameters.AddWithValue("@duration", heartbeat);
-
-                                        command2.ExecuteNonQuery();
-                                    }
+                                    command.ExecuteNonQuery();
                                 }
                             }
 
