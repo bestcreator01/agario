@@ -3,7 +3,7 @@ Author:		Seoin Kim, Gloria Shin
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  seointhenerd, bestcreator01
 Repo:       https://github.com/uofu-cs3500-spring23/assignment8agario-northkoreannotsouth
-Date:       17-Apr-2023 11:50 PM
+Date:       26-Apr-2023 11:50 PM
 Project:    ClientGUI
 Copyright:  CS 3500, Gloria Shin, and Seoin Kim - This work may not be copied for use 
 in Academic Coursework.
@@ -30,5 +30,6 @@ in Academic Coursework.
 	-none-
 
 # References:
-	
-	-none-
+	References used to insert data into sql datbase:
+	1) https://learnsql.com/blog/how-to-rank-rows-in-sql/
+    2) https://stackoverflow.com/questions/17632584/how-to-get-the-unix-timestamp-in-c-sharp

@@ -1,12 +1,10 @@
 ﻿using System.Timers;
-using System.Diagnostics;
 using Communications;
 using Microsoft.Extensions.Logging;
 using AgarioModels;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
-using Microsoft.Maui.Controls;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -131,7 +129,7 @@ namespace ClientGUI
                 }
             });
 
-            //logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
+            logger.LogInformation($"Playsurface is being invalidated, as well as the game status.");
         }
 
         /* Manage the GUI controls. */
@@ -165,7 +163,7 @@ namespace ClientGUI
                 if (matchesWithRecognizer)
                 {
                     networking.Send(message);
-                    //logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
+                    logger.LogInformation($"The client player just changed their direction. Sent message to server: {message}");
                 }
             }
         }
@@ -222,16 +220,6 @@ namespace ClientGUI
 
                         // Try connecting to server.
                         ConnectToServer();
-
-                        //using (SqlConnection connection = new SqlConnection(WebServer.WebServer.connectionString))
-                        //{
-                        //    connection.Open();
-
-                        //    using (SqlCommand command = new SqlCommand("DBCC CHECKIDENT('Game', RESEED, 1);", connection))
-                        //    {
-                        //        command.ExecuteNonQuery();
-                        //    }
-                        //}
 
                         logger.LogInformation($"The client successfully connected to server.");
                     }
@@ -316,7 +304,7 @@ namespace ClientGUI
                 deadImage.IsVisible = false;
             });
 
-            //logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
+            logger.LogInformation($"The client requested to restart the game. The game is being restarted.");
         }
 
         /// <summary>
@@ -345,7 +333,7 @@ namespace ClientGUI
             if (matchesWithRecognizer)
             {
                 channel.Send(startGameMessage + '\n');
-                //logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
+                logger.LogInformation($"The client just connected. Message sent to server: {startGameMessage}");
             }
         }
 
@@ -369,7 +357,7 @@ namespace ClientGUI
         /// <param name="message"> The message that was received. </param>
         void OnMessage(Networking channel, string message)
         {
-            //logger.LogInformation($"Just received a message from the server: {message}");
+            logger.LogInformation($"Just received a message from the server: {message}");
 
             // Initialize the date for recording purposes
             if (message.StartsWith(Protocols.CMD_Food))
@@ -422,7 +410,7 @@ namespace ClientGUI
                         if (worldDrawable.world.PlayerID == deadPlayerID)
                         {
                             // Record ending time.                            
-                            long unixEndTime = ((DateTimeOffset) DateTime.Now).ToUnixTimeSeconds();
+                            long unixEndTime = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
 
                             // Insert data into the table based on the player/game status.
                             using (SqlConnection connection = new SqlConnection(WebServer.WebServer.connectionString))
@@ -458,6 +446,7 @@ namespace ClientGUI
 
                                     command.ExecuteNonQuery();
 
+                                    // Update rank based on new incoming data.
                                     using (SqlCommand updateRankCommand = new SqlCommand("UPDATE LeaderBoard " +
                                         "SET Rank = subquery.Rank " +
                                         "FROM LeaderBoard " +
@@ -472,54 +461,7 @@ namespace ClientGUI
                                         updateRankCommand.ExecuteNonQuery();
                                     }
                                 }
-                            
-                            //using (SqlCommand command = new SqlCommand("DECLARE @gameID INT; " +
-                            //    "INSERT INTO Game (playerID, playerName, endTime) VALUES (@ID, @playerName, @endTime);" +
-                            //    "SET @gameID = SCOPE_IDENTITY();" +
-                            //    "INSERT INTO Player (playerID, playerName) VALUES (@ID, @playerName);" +
-                            //    "INSERT INTO Time (gameID, playerID, startTime) VALUES (@gameID, @ID, @startTime);" +
-                            //    "INSERT INTO Mass (gameID, playerID, Mass) VALUES (@gameID, @ID, @mass);" +
-                            //    "INSERT INTO Heartbeat (playerID, heartbeat) VALUES (@ID, @duration);" +
-                            //    "INSERT INTO LeaderBoard (gameID, playerID, playerName, Rank, Mass)" +
-                            //    "SELECT " +
-                            //        "@gameID as gameID, " +
-                            //        "@ID as playerID, " +
-                            //        "@playerName as playerName, " +
-                            //        "RANK() OVER(ORDER BY MAX(m.Mass) DESC) as Rank, " +
-                            //        "MAX(Mass) AS Mass " +
-                            //    "FROM Game g " +
-                            //    "JOIN Player p ON g.playerID = p.playerID AND g.playerName = p.playerName " +
-                            //    "JOIN Mass m ON g.gameID = m.gameID AND p.playerID = m.playerID" +
-                            //    "WHERE p.playerName = @playerName " +
-                            //    "GROUP BY p.playerName;", connection))
-                            //{
-                            //    // Set the parameter values and execute the query
-                            //    command.Parameters.AddWithValue("@playerName", worldDrawable.world.ClientPlayer.Name);
-                            //    command.Parameters.AddWithValue("@ID", worldDrawable.world.PlayerID);
-                            //    command.Parameters.AddWithValue("@startTime", unixStartTime);
-                            //    command.Parameters.AddWithValue("@endTime", unixEndTime);
-                            //    command.Parameters.AddWithValue("@mass", worldDrawable.world.ClientPlayer.Mass);
-                            //    command.Parameters.AddWithValue("@duration", heartbeat);
-
-                            //    command.ExecuteNonQuery();
-
-                            //    // Update rank based on new data
-                            //    using (SqlCommand updateRankCommand = new SqlCommand("UPDATE LeaderBoard " +
-                            //        "SET Rank = subquery.Rank " +
-                            //        "FROM LeaderBoard " +
-                            //        "JOIN ( " +
-                            //        "   SELECT p.playerID, RANK() OVER (ORDER BY MAX(Mass) DESC) AS Rank " +
-                            //        "   FROM Game g " +
-                            //        "   JOIN Player p ON g.playerID = p.playerID " +
-                            //        "   JOIN Mass m ON g.gameID = m.gameID AND p.playerID = m.playerID " +
-                            //        "   GROUP BY p.playerID " +
-                            //        ") AS subquery ON LeaderBoard.playerID = subquery.playerID", connection))
-                            //    {
-                            //        updateRankCommand.ExecuteNonQuery();
-                            //    }
-                            //}
-
-                        }
+                            }
 
                             Dispatcher.Dispatch(() =>
                             {
