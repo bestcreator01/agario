@@ -6,6 +6,7 @@ using AgarioModels;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
+using Microsoft.Maui.Controls;
 
 /// <summary>
 /// Author:     Seoin Kim and Gloria Shin
@@ -63,7 +64,7 @@ namespace ClientGUI
         /// <summary>
         ///     The exact time when the game started.
         /// </summary>
-        DateTime startTime = DateTime.Now;
+        long unixStartTime = 0;
 
         /// <summary>
         ///     The MainPage of ClientGUI.
@@ -222,6 +223,16 @@ namespace ClientGUI
                         // Try connecting to server.
                         ConnectToServer();
 
+                        //using (SqlConnection connection = new SqlConnection(WebServer.WebServer.connectionString))
+                        //{
+                        //    connection.Open();
+
+                        //    using (SqlCommand command = new SqlCommand("DBCC CHECKIDENT('Game', RESEED, 1);", connection))
+                        //    {
+                        //        command.ExecuteNonQuery();
+                        //    }
+                        //}
+
                         logger.LogInformation($"The client successfully connected to server.");
                     }
                     catch (Exception ex)
@@ -352,6 +363,7 @@ namespace ClientGUI
         ///     Callback for when a message arrives on the network.
         ///     
         ///     References: https://learnsql.com/blog/how-to-rank-rows-in-sql/
+        ///                 https://stackoverflow.com/questions/17632584/how-to-get-the-unix-timestamp-in-c-sharp
         /// </summary>
         /// <param name="channel"> The networking channel where the message came from. </param>
         /// <param name="message"> The message that was received. </param>
@@ -389,7 +401,8 @@ namespace ClientGUI
                 worldDrawable.world.PlayerID = playerID;
 
                 // Update time
-                startTime = DateTime.Now;
+                unixStartTime = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
+
 
                 // Get the client player object.
                 worldDrawable.world.GetClientPlayer();
@@ -409,30 +422,104 @@ namespace ClientGUI
                         if (worldDrawable.world.PlayerID == deadPlayerID)
                         {
                             // Record ending time.                            
-                            DateTime endTime = DateTime.Now;
+                            long unixEndTime = ((DateTimeOffset) DateTime.Now).ToUnixTimeSeconds();
 
+                            // Insert data into the table based on the player/game status.
                             using (SqlConnection connection = new SqlConnection(WebServer.WebServer.connectionString))
                             {
                                 connection.Open();
-
-                                int gameID = (int)worldDrawable.world.PlayerID;
-                                // Insert a new game record and retrieve the game ID.
-                                using (SqlCommand command = new SqlCommand("INSERT INTO Game (playerName, ID, endTime) VALUES (@playerName, @ID, @endTime); " +
-                                    "INSERT INTO StartTime (playerName, startTime, ID) VALUES (@playerName, @startTime, @ID); " +
-                                    "INSERT INTO Mass (playerName, Mass, ID) VALUES (@playerName, @mass, @ID);" +
-                                    "INSERT INTO Rank (playerName, rank, ID) VALUES (@playerName, (SELECT COUNT(*) + 1 FROM Mass WHERE ID = @ID AND Mass > (SELECT Mass FROM Mass WHERE ID = @ID AND playerName = @playerName)), @ID);" +
-                                    "INSERT INTO Duration (playerName, HeartBeat, ID) VALUES (@playerName, @duration, @ID);", connection))
+                                using (SqlCommand command = new SqlCommand("DECLARE @gameID INT; " +
+                                    "INSERT INTO Game (playerID, playerName, endTime) VALUES (@ID, @playerName, @endTime);" +
+                                    "SET @gameID = SCOPE_IDENTITY();" +
+                                    "INSERT INTO Player (playerID, playerName) VALUES (@ID, @playerName);" +
+                                    "INSERT INTO Time (gameID, playerID, startTime) VALUES (@gameID, @ID, @startTime);" +
+                                    "INSERT INTO Mass (gameID, playerID, Mass) VALUES (@gameID, @ID, @mass);" +
+                                    "INSERT INTO Heartbeat (playerID, heartbeat) VALUES (@ID, @duration);" +
+                                    "INSERT INTO LeaderBoard (gameID, playerID, playerName, Rank, Mass)" +
+                                    "SELECT " +
+                                        "@gameID as gameID, " +
+                                        "@ID as playerID, " +
+                                        "@playerName as playerName, " +
+                                        "RANK() OVER(ORDER BY MAX(m.Mass) DESC) as Rank, " +
+                                        "MAX(Mass) AS Mass " +
+                                    "FROM Game g " +
+                                    "JOIN Player p ON g.playerID = p.playerID AND g.playerName = p.playerName " +
+                                    "JOIN Mass m ON g.gameID = m.gameID AND p.playerID = m.playerID " +
+                                    "WHERE p.playerName = @playerName " +
+                                    "GROUP BY p.playerName;", connection))
                                 {
+                                    // Set the parameter values and execute the query
                                     command.Parameters.AddWithValue("@playerName", worldDrawable.world.ClientPlayer.Name);
                                     command.Parameters.AddWithValue("@ID", worldDrawable.world.PlayerID);
-                                    command.Parameters.AddWithValue("@startTime", startTime);
-                                    command.Parameters.AddWithValue("@endTime", endTime);
+                                    command.Parameters.AddWithValue("@startTime", unixStartTime);
+                                    command.Parameters.AddWithValue("@endTime", unixEndTime);
                                     command.Parameters.AddWithValue("@mass", worldDrawable.world.ClientPlayer.Mass);
                                     command.Parameters.AddWithValue("@duration", heartbeat);
 
                                     command.ExecuteNonQuery();
+
+                                    using (SqlCommand updateRankCommand = new SqlCommand("UPDATE LeaderBoard " +
+                                        "SET Rank = subquery.Rank " +
+                                        "FROM LeaderBoard " +
+                                        "JOIN ( " +
+                                        "   SELECT p.playerID, RANK() OVER (ORDER BY MAX(m.Mass) DESC) AS Rank " +
+                                        "   FROM Game g " +
+                                        "   JOIN Player p ON g.playerID = p.playerID " +
+                                        "   JOIN Mass m ON g.gameID = m.gameID AND p.playerID = m.playerID " +
+                                        "   GROUP BY p.playerID " +
+                                        ") AS subquery ON LeaderBoard.playerID = subquery.playerID", connection))
+                                    {
+                                        updateRankCommand.ExecuteNonQuery();
+                                    }
                                 }
-                            }
+                            
+                            //using (SqlCommand command = new SqlCommand("DECLARE @gameID INT; " +
+                            //    "INSERT INTO Game (playerID, playerName, endTime) VALUES (@ID, @playerName, @endTime);" +
+                            //    "SET @gameID = SCOPE_IDENTITY();" +
+                            //    "INSERT INTO Player (playerID, playerName) VALUES (@ID, @playerName);" +
+                            //    "INSERT INTO Time (gameID, playerID, startTime) VALUES (@gameID, @ID, @startTime);" +
+                            //    "INSERT INTO Mass (gameID, playerID, Mass) VALUES (@gameID, @ID, @mass);" +
+                            //    "INSERT INTO Heartbeat (playerID, heartbeat) VALUES (@ID, @duration);" +
+                            //    "INSERT INTO LeaderBoard (gameID, playerID, playerName, Rank, Mass)" +
+                            //    "SELECT " +
+                            //        "@gameID as gameID, " +
+                            //        "@ID as playerID, " +
+                            //        "@playerName as playerName, " +
+                            //        "RANK() OVER(ORDER BY MAX(m.Mass) DESC) as Rank, " +
+                            //        "MAX(Mass) AS Mass " +
+                            //    "FROM Game g " +
+                            //    "JOIN Player p ON g.playerID = p.playerID AND g.playerName = p.playerName " +
+                            //    "JOIN Mass m ON g.gameID = m.gameID AND p.playerID = m.playerID" +
+                            //    "WHERE p.playerName = @playerName " +
+                            //    "GROUP BY p.playerName;", connection))
+                            //{
+                            //    // Set the parameter values and execute the query
+                            //    command.Parameters.AddWithValue("@playerName", worldDrawable.world.ClientPlayer.Name);
+                            //    command.Parameters.AddWithValue("@ID", worldDrawable.world.PlayerID);
+                            //    command.Parameters.AddWithValue("@startTime", unixStartTime);
+                            //    command.Parameters.AddWithValue("@endTime", unixEndTime);
+                            //    command.Parameters.AddWithValue("@mass", worldDrawable.world.ClientPlayer.Mass);
+                            //    command.Parameters.AddWithValue("@duration", heartbeat);
+
+                            //    command.ExecuteNonQuery();
+
+                            //    // Update rank based on new data
+                            //    using (SqlCommand updateRankCommand = new SqlCommand("UPDATE LeaderBoard " +
+                            //        "SET Rank = subquery.Rank " +
+                            //        "FROM LeaderBoard " +
+                            //        "JOIN ( " +
+                            //        "   SELECT p.playerID, RANK() OVER (ORDER BY MAX(Mass) DESC) AS Rank " +
+                            //        "   FROM Game g " +
+                            //        "   JOIN Player p ON g.playerID = p.playerID " +
+                            //        "   JOIN Mass m ON g.gameID = m.gameID AND p.playerID = m.playerID " +
+                            //        "   GROUP BY p.playerID " +
+                            //        ") AS subquery ON LeaderBoard.playerID = subquery.playerID", connection))
+                            //    {
+                            //        updateRankCommand.ExecuteNonQuery();
+                            //    }
+                            //}
+
+                        }
 
                             Dispatcher.Dispatch(() =>
                             {
